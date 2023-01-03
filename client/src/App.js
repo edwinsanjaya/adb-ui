@@ -8,6 +8,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import Header from './components/Header.js'
 import HomePage from './pages/HomePage';
 import ProductListPage from './pages/ProductListPage';
+import ProductSearchPage from './pages/ProductSearchPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 
 
@@ -20,6 +21,7 @@ function App() {
           <Routes>
             <Route exact path="/" element={<HomePage/>} />
             <Route exact path="/products" element={<ProductListPage/>}/>
+            <Route exact path="/products/search" element={<ProductSearchPage/>}/>
             <Route exact path="/product/:product_id/detail" element={<ProductDetailPage/>}/>
           </Routes>
         </Container>

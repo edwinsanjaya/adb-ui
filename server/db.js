@@ -1,4 +1,5 @@
 const Pool = require("pg").Pool;
+const Sequelize = require("sequelize")
 
 const pool = new Pool({
   user: "postgres",
@@ -8,4 +9,6 @@ const pool = new Pool({
   database: "adb_final"
 })
 
-module.exports = pool;
+const sequelize = new Sequelize('postgres://postgres:admin@localhost:5432/adb_final')
+
+module.exports = { pool, sequelize };

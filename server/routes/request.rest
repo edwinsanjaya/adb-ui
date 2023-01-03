@@ -1,0 +1,1 @@
+GET http://localhost:5000/products/search?page=0&limit=10&search=Invisi

@@ -40,10 +40,10 @@ function Header(args) {
             </NavItem>
             <UncontrolledDropdown nav inNavbar>
               <DropdownToggle nav caret>
-                Options
+                Product
               </DropdownToggle>
               <DropdownMenu end>
-                <DropdownItem>Option 1</DropdownItem>
+                <DropdownItem href="/products/search">Search</DropdownItem>
                 <DropdownItem>Option 2</DropdownItem>
                 <DropdownItem divider />
                 <DropdownItem>Reset</DropdownItem>

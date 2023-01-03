@@ -1,15 +1,23 @@
 const express = require("express")
 const app = express();
 const cors = require("cors")
-const pool = require("./db")
+const { pool, sequelize } = require("./db")
+
+const products = require("./routes/products")
 
 // Middleware
 app.use(cors());
 app.use(express.json())
 
-// Routes
+// Sequelize
+sequelize.authenticate()
+  .then(() => console.log('Sequelize: Connection has been established successfully'))
+  .catch(err => console.log('Sequelize: Unable to connect to the database:', err))
 
-app.get("/products", async(req, res) => {
+// Routes
+app.use(products)
+
+app.get("/products", async (req, res) => {
   try {
     const products = await pool.query("SELECT * FROM products LIMIT 100")
     res.json(products.rows)
@@ -18,9 +26,9 @@ app.get("/products", async(req, res) => {
   }
 })
 
-app.get("/product/:product_id", async(req, res) => {
+app.get("/product/:product_id", async (req, res) => {
   try {
-    const {product_id} = req.params
+    const { product_id } = req.params
     const product = await pool.query("SELECT * FROM products WHERE product_id = $1", [product_id])
     res.json(product.rows)
   } catch (err) {
