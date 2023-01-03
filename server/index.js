@@ -4,6 +4,7 @@ const cors = require("cors")
 const { pool, sequelize } = require("./db")
 
 const products = require("./routes/products")
+const suppliers = require("./routes/suppliers")
 
 // Middleware
 app.use(cors());
@@ -16,6 +17,7 @@ sequelize.authenticate()
 
 // Routes
 app.use(products)
+app.use(suppliers)
 
 app.get("/products", async (req, res) => {
   try {
