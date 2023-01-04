@@ -21,11 +21,11 @@ function Header(args) {
 
   return (
     <div>
-      <Navbar color="dark" expand="sm" dark {...args}>
+      <Navbar end color="dark" expand="sm" dark {...args}>
         <NavbarBrand href="/">ADB Viewer</NavbarBrand>
         <NavbarToggler onClick={toggle} />
         <Collapse isOpen={isOpen} navbar>
-          <Nav className="ms-auto" navbar>
+          <Nav className="ml-auto" navbar>
             <NavItem>
               <NavLink href="/">Home</NavLink>
             </NavItem>
@@ -45,6 +45,18 @@ function Header(args) {
               <DropdownMenu end>
                 <DropdownItem href="/products/search">Search</DropdownItem>
                 <DropdownItem>Option 2</DropdownItem>
+                <DropdownItem divider />
+                <DropdownItem>Reset</DropdownItem>
+              </DropdownMenu>
+            </UncontrolledDropdown>
+            <UncontrolledDropdown nav inNavbar>
+              <DropdownToggle nav caret>
+                Tools
+              </DropdownToggle>
+              <DropdownMenu end>
+                <DropdownItem href="/tools/query">Query Tools</DropdownItem>
+                <DropdownItem>Map Tools</DropdownItem>
+                <DropdownItem>Graph Tools</DropdownItem>
                 <DropdownItem divider />
                 <DropdownItem>Reset</DropdownItem>
               </DropdownMenu>
