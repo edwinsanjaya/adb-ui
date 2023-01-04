@@ -19,6 +19,17 @@ sequelize.authenticate()
 app.use(products)
 app.use(suppliers)
 
+app.post("/query", async (req, res) => {
+  try {
+    console.log(req.body.query)
+    const query = req.body.query
+    const results = await pool.query(query)
+    res.json(results.rows)
+  } catch (err) {
+    console.error(err.message)
+  }
+})
+
 app.get("/products", async (req, res) => {
   try {
     const products = await pool.query("SELECT * FROM products LIMIT 100")

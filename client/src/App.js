@@ -10,6 +10,7 @@ import HomePage from './pages/HomePage';
 import ProductListPage from './pages/ProductListPage';
 import ProductSearchPage from './pages/ProductSearchPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import QueryPage from './pages/QueryPage';
 import TestMapPage from './pages/TestMapPage';
 
 
@@ -24,6 +25,7 @@ function App() {
             <Route exact path="/products" element={<ProductListPage/>}/>
             <Route exact path="/products/search" element={<ProductSearchPage/>}/>
             <Route exact path="/product/:product_id/detail" element={<ProductDetailPage/>}/>
+            <Route exact path="/tools/query" element={<QueryPage/>}></Route>
             <Route exact path="/map/test" element={<TestMapPage/>}/>
           </Routes>
         </Container>
