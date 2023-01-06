@@ -4,16 +4,20 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Pagination, TablePagination } from '@mui/material'
 
+var search = {
+  supplierName: "",
+  supplierAddress: "",
+  taiwanCountry: "",
+  pages: 0,
+}
+
 function SupplierSearchPage(props) {
 
   const [state, setState] = useState({
-    supplierName: "",
-    supplierAddress: "",
-    taiwanCountry: "",
     totalItems: 0,
-    pages: 0,
     page: 1,
-    size: 50
+    size: 50,
+    rng: "",
   })
 
   const [inputs, setInputs] = useState({
@@ -27,9 +31,9 @@ function SupplierSearchPage(props) {
   async function searchSuppliers() {
     const url = 'http://localhost:5000/suppliers/filter'
     const data = {
-      taiwanCountry: state.taiwanCountry,
-      name: state.supplierName,
-      address: state.supplierAddress
+      taiwanCountry: search.taiwanCountry,
+      name: search.supplierName,
+      address: search.supplierAddress
     }
     const config = {
       headers: {
@@ -48,19 +52,13 @@ function SupplierSearchPage(props) {
       totalItems: response.data.metadata.totalItems,
       page: parseInt(response.data.metadata.page, 10),
       size: parseInt(response.data.metadata.size, 10),
-      pages: Math.ceil(state.totalItems/state.size)
     })
+    search.pages = Math.ceil(state.totalItems/state.size)
   }
 
   useEffect(() => {
     searchSuppliers();
-  }, [
-    state.page,
-    state.size,
-    state.supplierName,
-    state.supplierAddress,
-    state.taiwanCountry,
-  ])
+  }, [state.page, state.rng, state.size])
 
   function handleInputChange(event) {
     const target = event.target;
@@ -74,14 +72,15 @@ function SupplierSearchPage(props) {
   }
 
   function handleSearch(event) {
+    search.supplierName = inputs.supplierName
+    search.supplierAddress = inputs.supplierAddress
+    search.taiwanCountry = inputs.taiwanCountry
+
     setState({
       ...state,
-      supplierName: inputs.supplierName,
-      supplierAddress: inputs.supplierAddress,
-      taiwanCountry: inputs.taiwanCountry,
-      page: 1
+      page: 1,
+      rng: state.rng + 1
     });
-    searchSuppliers();
   }
 
   function changePage(event, value) {
@@ -91,7 +90,6 @@ function SupplierSearchPage(props) {
       ...state,
       page: nextPage
     });
-    searchSuppliers();
   };
 
   function changeRowsPerPage(event) {
@@ -100,7 +98,6 @@ function SupplierSearchPage(props) {
       page: 1,
       size: parseInt(event.target.value, 10)
     });
-    searchSuppliers();
   }
 
   return (
