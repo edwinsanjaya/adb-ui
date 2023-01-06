@@ -4,10 +4,10 @@ const { sequelize } = require('../db.js')
 class Product extends Model {}
 
 Product.init({
-  supplierId: {
+  productId: {
     type: DataTypes.INTEGER
   },
-  productId: {
+  supplierId: {
     type: DataTypes.INTEGER
   },
   productName: {
@@ -17,13 +17,13 @@ Product.init({
     type: DataTypes.INTEGER
   },
   subcategory: {
-    type: DataTypes.BIGINT
+    type: DataTypes.INTEGER
   },
-  partNumber: {
+  partName: {
     type: DataTypes.STRING
   },
   eanBarcode: {
-    type: DataTypes.STRING
+    type: DataTypes.BIGINT
   },
   length: {
     type: DataTypes.DOUBLE
@@ -35,10 +35,16 @@ Product.init({
     type: DataTypes.DOUBLE
   },
   weight: {
-    type: DataTypes.DOUBLE
+    type: DataTypes.INTEGER
   },
   warehouseCompany: {
     type: DataTypes.STRING
+  },
+  latitude: {
+    type: DataTypes.DOUBLE
+  },
+  longitude:{
+    type: DataTypes.DOUBLE
   },
   createdAt: {
     type: DataTypes.DATE

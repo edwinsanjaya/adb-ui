@@ -20,7 +20,7 @@ function Header(args) {
 
   return (
     <div>
-      <Navbar end color="dark" expand="sm" dark {...args}>
+      <Navbar end="true" color="dark" expand="sm" dark {...args}>
         <NavbarBrand href="/">ADB Viewer</NavbarBrand>
         <NavbarToggler onClick={toggle} />
         <Collapse isOpen={isOpen} navbar>

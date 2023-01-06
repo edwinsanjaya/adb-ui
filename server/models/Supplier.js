@@ -10,14 +10,11 @@ Supplier.init({
   supplierName: {
     type: DataTypes.STRING
   },
-  sourceZipcode: {
-    type: DataTypes.INTEGER
-  },
   sourceAddress: {
     type: DataTypes.STRING
   },
-  sourceAddress1: {
-    type: DataTypes.STRING
+  sourceZipcode: {
+    type: DataTypes.INTEGER
   },
   sourceLatitude: {
     type: DataTypes.DOUBLE
@@ -25,11 +22,11 @@ Supplier.init({
   sourceLongitude: {
     type: DataTypes.DOUBLE
   },
-  supplierZipcode: {
-    type: DataTypes.INTEGER
-  },
   supplierAddress: {
     type: DataTypes.STRING
+  },
+  supplierZipcode: {
+    type: DataTypes.INTEGER
   },
   supplierLatitude: {
     type: DataTypes.DOUBLE
