@@ -28,22 +28,35 @@ function Header(args) {
             <NavItem>
               <NavLink href="/">Home</NavLink>
             </NavItem>
-            <NavItem>
-              <NavLink href="/products/">Products</NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink href="/products/">Orders</NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink href="/suppliers/">Suppliers</NavLink>
-            </NavItem>
+            <UncontrolledDropdown nav inNavbar>
+              <DropdownToggle nav caret>
+                Supplier
+              </DropdownToggle>
+              <DropdownMenu end>
+                <DropdownItem href="/suppliers/search">Search</DropdownItem>
+                <DropdownItem>Map</DropdownItem>
+                <DropdownItem divider />
+                <DropdownItem>Reset</DropdownItem>
+              </DropdownMenu>
+            </UncontrolledDropdown>
             <UncontrolledDropdown nav inNavbar>
               <DropdownToggle nav caret>
                 Product
               </DropdownToggle>
               <DropdownMenu end>
                 <DropdownItem href="/products/search">Search</DropdownItem>
-                <DropdownItem>Option 2</DropdownItem>
+                <DropdownItem>Map</DropdownItem>
+                <DropdownItem divider />
+                <DropdownItem>Reset</DropdownItem>
+              </DropdownMenu>
+            </UncontrolledDropdown>
+            <UncontrolledDropdown nav inNavbar>
+              <DropdownToggle nav caret>
+                Order
+              </DropdownToggle>
+              <DropdownMenu end>
+                <DropdownItem href="/orders/search">Search</DropdownItem>
+                <DropdownItem>Map</DropdownItem>
                 <DropdownItem divider />
                 <DropdownItem>Reset</DropdownItem>
               </DropdownMenu>
@@ -54,8 +67,8 @@ function Header(args) {
               </DropdownToggle>
               <DropdownMenu end>
                 <DropdownItem href="/tools/query">Query Tools</DropdownItem>
-                <DropdownItem>Map Tools</DropdownItem>
-                <DropdownItem>Graph Tools</DropdownItem>
+                <DropdownItem href="/map/box">Map Tools</DropdownItem>
+                <DropdownItem href="https://workspace-preview.neo4j.io/workspace/explore" target="_blank" rel="noopener noreferrer">Graph Tools</DropdownItem>
                 <DropdownItem divider />
                 <DropdownItem>Reset</DropdownItem>
               </DropdownMenu>
