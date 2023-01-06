@@ -40,7 +40,7 @@ function ProductSearchPage(props) {
 
   useEffect(() => {
     searchProducts();
-  }, [state.page, state.search])
+  }, [state.page, state.search, state.limit])
 
   function handleChange(event) {
     const target = event.target;
