@@ -5,7 +5,8 @@ class Supplier extends Model {}
 
 Supplier.init({
   supplierId: {
-    type: DataTypes.INTEGER
+    type: DataTypes.INTEGER,
+    primaryKey: true
   },
   supplierName: {
     type: DataTypes.STRING
