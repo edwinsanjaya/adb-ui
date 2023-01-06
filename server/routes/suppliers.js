@@ -19,11 +19,27 @@ router.post('/suppliers/filter', async (req, res) => {
     const page = req.query.page;
     const size = req.query.size;
     const body = req.body;
-    const taiwanCountryFilter = body.taiwanCountry;
     const filter = []
+    const taiwanCountryFilter = body.taiwanCountry;
     if (taiwanCountryFilter) {
         filter.push(Sequelize.where(Sequelize.fn(`ST_Within`, Sequelize.col('supplier_geom'),
             Sequelize.literal(`(SELECT geom FROM taiwan_county WHERE countyeng = '${taiwanCountryFilter}')`)), true))
+    }
+    const nameFilter = body.name;
+    if (nameFilter) {
+        filter.push({
+            supplierName: {
+                [Op.like]: `%${nameFilter}%`
+            }
+        })
+    }
+    const addressFilter = body.address;
+    if (addressFilter) {
+        filter.push({
+            supplierAddress: {
+                [Op.like]: `%${addressFilter}%`
+            }
+        })
     }
 
     suppliers = await Supplier.findAll({
