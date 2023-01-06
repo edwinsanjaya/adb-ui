@@ -1,14 +1,20 @@
 const { DataTypes, Model } = require('sequelize')
 const { sequelize } = require('../db.js')
+const Supplier = require('./Supplier')
 
 class Product extends Model {}
 
 Product.init({
   productId: {
-    type: DataTypes.INTEGER
+    type: DataTypes.INTEGER,
+    primaryKey: true
   },
   supplierId: {
-    type: DataTypes.INTEGER
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'suppliers',
+      key: 'supplier_id'
+    }
   },
   productName: {
     type: DataTypes.STRING
@@ -37,15 +43,6 @@ Product.init({
   weight: {
     type: DataTypes.INTEGER
   },
-  warehouseCompany: {
-    type: DataTypes.STRING
-  },
-  latitude: {
-    type: DataTypes.DOUBLE
-  },
-  longitude:{
-    type: DataTypes.DOUBLE
-  },
   createdAt: {
     type: DataTypes.DATE
   },
@@ -57,5 +54,11 @@ Product.init({
   underscored: true,
   sequelize
 });
+
+Product.belongsTo(Supplier, {
+  foreignKey: 'supplierId',
+  targetKey: 'supplierId',
+  as: 'supplier'
+})
 
 module.exports = Product
