@@ -40,12 +40,6 @@ Product.init({
   warehouseCompany: {
     type: DataTypes.STRING
   },
-  latitude: {
-    type: DataTypes.DOUBLE
-  },
-  longitude:{
-    type: DataTypes.DOUBLE
-  },
   createdAt: {
     type: DataTypes.DATE
   },
@@ -57,5 +51,7 @@ Product.init({
   underscored: true,
   sequelize
 });
+
+Product.removeAttribute('id');
 
 module.exports = Product
