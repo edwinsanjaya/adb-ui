@@ -22,4 +22,14 @@ router.get('/dashboard/top-ten-supplier-by-product', async (req, res) => {
   }
 })
 
+router.get('/dashboard/top-ten-supplier-by-order', async (req, res) => {
+  try {
+      const suppliers = await pool.query("SELECT products.supplier_id AS supplier_id,(SELECT supplier_name FROM suppliers WHERE products.supplier_id = suppliers.supplier_id), count(*) AS total_orders FROM orders INNER JOIN products ON orders.product_id = products.product_id GROUP BY supplier_id ORDER BY total_orders DESC LIMIT 10")
+      res.json(suppliers.rows)
+  } catch (error) {
+      console.log(error);
+      res.status(500).json({error: true, message: 'Internal Server Error'})
+  }
+})
+
 module.exports = router;

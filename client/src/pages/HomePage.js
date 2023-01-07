@@ -63,8 +63,16 @@ function HomePage(props) {
     setDashboard1(response.data)
   }
 
+  const getDashboard2 = async () => {
+    const url = 'http://localhost:5000/dashboard/top-ten-supplier-by-order'
+    const response = await axios.get(url);
+    setDashboard2(response.data)
+  }
+
+
   useEffect(() => {
     getDashboard1()
+    getDashboard2()
   }, [])
 
   return (
@@ -106,7 +114,35 @@ function HomePage(props) {
 
 
           <Grid item xs={6}>
-            <Item>2</Item>
+          <Item>
+              <h4>Top 10 Seller by Orders</h4>
+              {dashboard2.length !== 0 &&
+                <TableContainer component={Paper}>
+                  <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                    <TableHead>
+                      <TableRow>
+                        {Object.keys(dashboard2[0]).map(function (key) {
+                          return (
+                            <StyledTableCell align="right">{key}</StyledTableCell>
+                          )
+                        })}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {dashboard2.map((result, index) => (
+                        <StyledTableRow key={index}>
+                          {Object.keys(result).map(function (key) {
+                            return (
+                              <StyledTableCell align="right">{result[key]}</StyledTableCell>
+                            )
+                          })}
+                        </StyledTableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              }
+            </Item>
           </Grid>
 
 
@@ -114,7 +150,7 @@ function HomePage(props) {
             <Item>3</Item>
           </Grid>
 
-          
+
           <Grid item xs={6}>
             <Item>4</Item>
           </Grid>
