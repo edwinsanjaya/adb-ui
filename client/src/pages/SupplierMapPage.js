@@ -44,16 +44,7 @@ function SupplierMapPage(props) {
   const [counties, setCounties] = useState([])
   const [towns, setTowns] = useState([])
 
-  const [status, setStatus] = ("")
-
-  const dummy = [
-    {
-      "location": "Hsinchu Park",
-      "city": "East District",
-      "state": "Hsinchu City",
-      "coordinates": [120.9773, 24.8009],
-    }
-  ]
+  const [status, setStatus] = useState("Try Me!")
 
   const mapContainer = useRef(null);
   const map = useRef(null);
@@ -86,6 +77,7 @@ function SupplierMapPage(props) {
     }
     const response = await axios.post(url, data);
     setSuppliers(response.data)
+    setStatus("Done!")
   }
 
   useEffect(() => {
@@ -110,7 +102,7 @@ function SupplierMapPage(props) {
       var popup = new mapboxgl.Popup({ offset: 30 })
         .setHTML('<h4>' + supplier.supplier_name + '</h4>' + supplier.supplier_address + " " + supplier.supplier_zipcode)
 
-      var marker = new mapboxgl.Marker()
+      var marker = new mapboxgl.Marker({scale: 0.75})
         .setLngLat(supplier.supplier_geom.coordinates)
         .setPopup(popup)
         .addTo(map.current)
@@ -134,6 +126,7 @@ function SupplierMapPage(props) {
     search.county = inputs.county
     search.town = inputs.town
     getSuppliers()
+    setStatus("Loading...")
   }
 
   return (
@@ -214,6 +207,7 @@ function SupplierMapPage(props) {
         <Button variant="contained" onClick={handleSearch}>Search</Button>
         {/* <div>{JSON.stringify(suppliers)}</div> */}
       </div>
+      <div>{status}</div>
       <div ref={mapContainer} className="map-container" />
     </div>
   );
