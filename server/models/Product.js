@@ -10,11 +10,7 @@ Product.init({
     primaryKey: true
   },
   supplierId: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: 'suppliers',
-      key: 'supplier_id'
-    }
+    type: DataTypes.INTEGER
   },
   productName: {
     type: DataTypes.STRING
@@ -55,10 +51,5 @@ Product.init({
   sequelize
 });
 
-Product.belongsTo(Supplier, {
-  foreignKey: 'supplierId',
-  targetKey: 'supplierId',
-  as: 'supplier'
-})
 
 module.exports = Product

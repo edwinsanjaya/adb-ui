@@ -27,10 +27,19 @@ router.post('/suppliers/filter', async (req, res) => {
     }
     const nameFilter = body.name;
     if (nameFilter) {
+        const queryOrNameFilter = [];
+        if (!isNaN(nameFilter)) {
+            queryOrNameFilter.push({
+                supplierId: nameFilter
+            })
+        }
         filter.push({
             supplierName: {
                 [Op.like]: `%${nameFilter}%`
             }
+        })
+        filter.push({
+            [Op.or]: [...queryOrNameFilter]
         })
     }
     const addressFilter = body.address;
