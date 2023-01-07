@@ -103,6 +103,21 @@ router.post('/orders/filter', async (req, res, next) => {
                 cancelReason: cancelReasonFilter
             })
         }
+        if (typeof cancelledFilter == "boolean") {
+            if (!!cancelledFilter) {
+                cancelOrderFilter.push({
+                    rgId: {
+                        [Op.is]: null
+                    }
+                })
+            } else {
+                cancelOrderFilter.push({
+                    rgId: {
+                        [Op.not]: null
+                    }
+                })
+            }
+        }
 
         const orderBy = [];
         if (sortedBy && sortDirection) {
@@ -132,7 +147,7 @@ router.post('/orders/filter', async (req, res, next) => {
         queryOptions.include.push({
             model: CancelOrder,
             as: 'cancelOrder',
-            required: !!cancelledFilter || cancelOrderFilter.length > 0,
+            required: cancelOrderFilter.length > 0,
             where: Sequelize.and(...cancelOrderFilter)
         })
         if (orderBy.length > 0) {
@@ -144,6 +159,7 @@ router.post('/orders/filter', async (req, res, next) => {
         delete queryOptions.limit;
         delete queryOptions.offset;
         delete queryOptions.order;
+        queryOptions.distinct = false;
         const totalItems = await Order.count(queryOptions)
         const response = {
             content: orders,
