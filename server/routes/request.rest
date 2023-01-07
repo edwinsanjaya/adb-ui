@@ -1,3 +1,3 @@
 # GET http://localhost:5000/products/search?page=0&limit=10&search=Invisi
 
-GET http://localhost:5000/suppliers/product_id/7211118
+http://localhost:5000/dashboard/top-ten-supplier-by-product

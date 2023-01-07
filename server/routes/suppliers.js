@@ -15,6 +15,17 @@ router.get('/suppliers/product_id/:product_id', async (req, res) => {
     }
 })
 
+router.get('/supplier/:supplier_id', async (req, res) => {
+  try {
+      const {supplier_id} = req.params
+      const supplier = await pool.query("SELECT * from suppliers where supplier_id = $1", [supplier_id])
+      res.json(supplier.rows)
+  } catch (error) {
+      console.log(error);
+      res.status(500).json({error: true, message: 'Internal Server Error'})
+  }
+})
+
 router.post('/suppliers/filter', async (req, res) => {
     const page = req.query.page;
     const size = req.query.size;
