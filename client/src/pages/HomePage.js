@@ -12,6 +12,9 @@ import {
 } from '@mui/material';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import axios from "axios"
+import { Link } from 'react-router-dom'
+
+import './HomePage.scss'
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -46,6 +49,7 @@ function HomePage(props) {
   const [dashboard1, setDashboard1] = useState([])
   const [dashboard2, setDashboard2] = useState([])
   const [dashboard3, setDashboard3] = useState([])
+  const [dashboard4, setDashboard4] = useState([])
 
   const getDashboard1 = async () => {
     const url = 'http://localhost:5000/dashboard/top-ten-supplier-by-product'
@@ -65,16 +69,33 @@ function HomePage(props) {
     setDashboard3(response.data)
   }
 
+  const getDashboard4 = async () => {
+    const url = 'http://localhost:5000/dashboard/top-ten-town-by-supplier'
+    const response = await axios.get(url);
+    setDashboard4(response.data)
+  }
+
 
   useEffect(() => {
     getDashboard1()
     getDashboard2()
     getDashboard3()
+    getDashboard4()
   }, [])
 
   return (
     <div>
       <Box sx={{ width: '100%' }}>
+
+        <div className='header'>
+          <Grid container>
+            <Grid item xs={12}>
+              <Item><h2>Suppliers Highlight</h2></Item>
+            </Grid>
+          </Grid>
+        </div>
+
+
         <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
           <Grid item xs={6}>
             <Item>
@@ -95,9 +116,17 @@ function HomePage(props) {
                       {dashboard1.map((result, index) => (
                         <StyledTableRow key={index}>
                           {Object.keys(result).map(function (key) {
-                            return (
-                              <StyledTableCell align="left">{result[key]}</StyledTableCell>
-                            )
+                            if (key === 'supplier_name')
+                              return (
+                                <Link to={"/supplier/" + result.supplier_id + "/detail"}>
+                                  <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                                </Link>
+                              )
+                            else {
+                              return (
+                                <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                              )
+                            }
                           })}
                         </StyledTableRow>
                       ))}
@@ -107,8 +136,6 @@ function HomePage(props) {
               }
             </Item>
           </Grid>
-
-
 
           <Grid item xs={6}>
             <Item>
@@ -129,9 +156,17 @@ function HomePage(props) {
                       {dashboard2.map((result, index) => (
                         <StyledTableRow key={index}>
                           {Object.keys(result).map(function (key) {
-                            return (
-                              <StyledTableCell align="left">{result[key]}</StyledTableCell>
-                            )
+                            if (key === 'supplier_name')
+                              return (
+                                <Link to={"/supplier/" + result.supplier_id + "/detail"}>
+                                  <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                                </Link>
+                              )
+                            else {
+                              return (
+                                <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                              )
+                            }
                           })}
                         </StyledTableRow>
                       ))}
@@ -141,7 +176,17 @@ function HomePage(props) {
               }
             </Item>
           </Grid>
+        </Grid>
 
+        <div className='header'>
+          <Grid container>
+            <Grid item xs={12}>
+              <Item><h2>Regional Highlight</h2></Item>
+            </Grid>
+          </Grid>
+        </div>
+
+        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
 
           <Grid item xs={6}>
             <Item>
@@ -175,9 +220,36 @@ function HomePage(props) {
             </Item>
           </Grid>
 
-
           <Grid item xs={6}>
-            <Item>4</Item>
+            <Item>
+              <h4>Top 10 Counties by Suppliers</h4>
+              {dashboard4.length !== 0 &&
+                <TableContainer component={Paper}>
+                  <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                    <TableHead>
+                      <TableRow>
+                        {Object.keys(dashboard4[0]).map(function (key) {
+                          return (
+                            <StyledTableCell align="left">{key}</StyledTableCell>
+                          )
+                        })}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {dashboard4.map((result, index) => (
+                        <StyledTableRow key={index}>
+                          {Object.keys(result).map(function (key) {
+                            return (
+                              <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                            )
+                          })}
+                        </StyledTableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              }
+            </Item>
           </Grid>
         </Grid>
       </Box>
