@@ -110,7 +110,7 @@ router.post("/products/filter", async (req, res, next) => {
         const queryOptions = {
             where: Sequelize.and(...productQueryFilters),
             limit: size,
-            offset: page * size,
+            offset: (page -1) * size,
             order: orders
         }
         const products = await Product.findAll(queryOptions);
