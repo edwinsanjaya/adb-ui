@@ -1,6 +1,8 @@
 const router = require("express").Router()
 const Supplier = require("../models/Supplier");
 const TaiwanCountry = require("../models/TaiwanCountry");
+const Product = require("../models/Product");
+const Order = require("../models/Order");
 const {Op, Sequelize} = require('sequelize');
 const {pool, sequelize} = require('../db.js')
 
@@ -36,6 +38,11 @@ router.post('/suppliers/filter', async (req, res) => {
         filter.push(Sequelize.where(Sequelize.fn(`ST_Within`, Sequelize.col('supplier_geom'),
             Sequelize.literal(`(SELECT geom FROM taiwan_county WHERE countyeng = '${taiwanCountryFilter}')`)), true))
     }
+    const taiwanTownFilter = body.taiwanTown;
+    if (taiwanTownFilter) {
+        filter.push(Sequelize.where(Sequelize.fn(`ST_Within`, Sequelize.col('supplier_geom'),
+            Sequelize.literal(`(SELECT geom FROM taiwan_town WHERE towneng = '${taiwanTownFilter}')`)), true))
+    }
     const nameFilter = body.name;
     if (nameFilter) {
         const queryOrNameFilter = [];
@@ -61,27 +68,89 @@ router.post('/suppliers/filter', async (req, res) => {
             }
         })
     }
+    const orderPeriodFilter = body.orderPeriod;
+    const joinOrderFilters = [];
+    if (orderPeriodFilter) {
+        const startPeriod = new Date(orderPeriodFilter)
+        startPeriod.setHours(0)
+        startPeriod.setMinutes(0)
+        startPeriod.setSeconds(0)
+        startPeriod.setMilliseconds(0)
 
-    suppliers = await Supplier.findAll({
+        const endPeriod = new Date(orderPeriodFilter)
+        endPeriod.setHours(23)
+        endPeriod.setMinutes(59)
+        endPeriod.setSeconds(59)
+        endPeriod.setMilliseconds(59)
+
+        joinOrderFilters.push({
+            orderTime: {
+                [Op.gte]: startPeriod,
+                [Op.lte]: endPeriod
+            }
+        })
+    }
+
+    const zipCodeFilter = body.zipCode;
+    if (zipCodeFilter) {
+        filter.push({
+            supplierZipcode: zipCodeFilter
+        })
+    }
+
+    const fileSourceFilter = body.fileSource;
+    const joinProductFilters = [];
+    if (fileSourceFilter) {
+        joinProductFilters.push({
+            fileSource: fileSourceFilter
+        });
+    }
+
+    let findOptions = {
         where: Sequelize.and(...filter),
         limit: size,
         offset: (page - 1) * size
-    })
+    };
 
-    totalCount = await Supplier.count({
-        where: Sequelize.and(...filter)
-    })
+    if (joinProductFilters.length > 0 || joinOrderFilters.length > 0) {
+        findOptions.include = [{
+            model: Product,
+            as: 'products',
+            required: joinProductFilters.length > 0,
+            where: Sequelize.and(...joinProductFilters),
+            include: [{
+                model: Order,
+                as: 'orders',
+                required: joinOrderFilters.length > 0,
+                where: Sequelize.and(...joinOrderFilters)
+            }]
+        }]
+    }
+
+    const sortedBy = body.sortedBy;
+    const sortDirection = body.sortDirection;
+    if (sortedBy && sortDirection) {
+        findOptions.order = [
+            [sortedBy, sortDirection]
+        ]
+    }
+
+    const suppliers = await Supplier.findAll(findOptions)
+
+    delete findOptions.limit
+    delete findOptions.offset
+    const totalCount = await Supplier.count(findOptions)
     for (let supplier of suppliers) {
         const [orderCountResult, orderCountMetadata] = await sequelize.query(`select count(*)
-                                                           from products p
-                                                                    inner join orders o on p.product_id = o.product_id
-                                                           where p.supplier_id = '${supplier.dataValues.supplierId}'`)
+                                                                              from products p
+                                                                                       inner join orders o on p.product_id = o.product_id
+                                                                              where p.supplier_id = '${supplier.dataValues.supplierId}'`)
         const totalOrderCount = orderCountResult[0].count
         supplier.dataValues.totalOrderCount = Number(totalOrderCount)
 
         const [productCountResult, productCountMetadata] = await sequelize.query(`select count(*)
-                                                           from products p
-                                                           where p.supplier_id = '${supplier.dataValues.supplierId}'`)
+                                                                                  from products p
+                                                                                  where p.supplier_id = '${supplier.dataValues.supplierId}'`)
         const totalProductCount = productCountResult[0].count
         supplier.dataValues.totalProductCount = Number(totalProductCount)
     }

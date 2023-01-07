@@ -110,7 +110,13 @@ router.post('/orders/filter', async (req, res) => {
     }
 
     let queryOptions = {
-        include: [{
+        include: [],
+        where: Sequelize.and(...orderFilters),
+        limit: size,
+        offset: page * size
+    };
+    if (productFilters.length > 0 || supplierFilter.length > 0) {
+        queryOptions.include.push({
             model: Product,
             as: 'product',
             required: productFilters.length > 0,
@@ -121,16 +127,16 @@ router.post('/orders/filter', async (req, res) => {
                 required: supplierFilter.length > 0,
                 where: Sequelize.and(...supplierFilter)
             }]
-        }, {
+        })
+    }
+    if (cancelOrderFilter.length > 0) {
+        queryOptions.include.push({
             model: CancelOrder,
             as: 'cancelOrder',
             required: !!cancelledFilter || cancelOrderFilter.length > 0,
             where: Sequelize.and(...cancelOrderFilter)
-        }],
-        where: Sequelize.and(...orderFilters),
-        limit: size,
-        offset: page * size
-    };
+        })
+    }
     if (orderBy.length > 0) {
         queryOptions.order = [orderBy]
     }

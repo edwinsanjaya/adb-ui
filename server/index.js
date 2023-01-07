@@ -14,7 +14,8 @@ const CancelOrder = require("./models/CancelOrder");
 const Order = require("./models/Order")
 
 Supplier.hasMany(Product, {
-  foreignKey: 'supplierId'
+  foreignKey: 'supplierId',
+  as: 'products'
 })
 
 Product.belongsTo(Supplier, {
@@ -28,6 +29,11 @@ Order.belongsTo(Product, {
   targetKey: 'productId',
   as: 'product'
 });
+
+Product.hasMany(Order, {
+  foreignKey: 'productId',
+  as: 'orders'
+})
 
 Order.hasOne(CancelOrder, {
   foreignKey: 'rgId',
