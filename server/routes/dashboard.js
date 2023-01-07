@@ -32,4 +32,14 @@ router.get('/dashboard/top-ten-supplier-by-order', async (req, res) => {
   }
 })
 
+router.get('/dashboard/top-ten-county-by-supplier', async (req, res) => {
+  try {
+      const counties = await pool.query("SELECT tc.countyname AS taiwan_county, Count(s.supplier_id) AS total_supplier FROM taiwan_county AS tc JOIN suppliers AS s ON st_contains(tc.geom, s.supplier_geom) GROUP BY taiwan_county ORDER BY total_supplier DESC LIMIT 10")
+      res.json(counties.rows)
+  } catch (error) {
+      console.log(error);
+      res.status(500).json({error: true, message: 'Internal Server Error'})
+  }
+})
+
 module.exports = router;
