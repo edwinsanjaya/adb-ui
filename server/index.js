@@ -6,6 +6,7 @@ const { pool, sequelize } = require("./db")
 const products = require("./routes/products")
 const suppliers = require("./routes/suppliers")
 const orders = require("./routes/orders")
+const dashboard = require("./routes/dashboard")
 
 const Product = require("./models/Product")
 const Supplier = require("./models/Supplier")
@@ -51,6 +52,7 @@ sequelize.authenticate()
 app.use(products)
 app.use(suppliers)
 app.use(orders)
+app.use(dashboard)
 
 app.post("/query", async (req, res) => {
   try {

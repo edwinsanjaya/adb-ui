@@ -17,7 +17,7 @@ function SupplierSearchPage(props) {
     totalItems: 0,
     page: 1,
     size: 50,
-    rng: "",
+    rng: 1,
   })
 
   const [inputs, setInputs] = useState({
@@ -150,8 +150,8 @@ function SupplierSearchPage(props) {
                 <td>{supplier.supplierId}</td>
                 <td><Link to={"/supplier/" + supplier.supplierId + "/detail"}>{supplier.supplierName}</Link></td>
                 <td>{supplier.supplierAddress}</td>
-                <td></td>
-                <td></td>
+                <td>{supplier.totalOrderCount}</td>
+                <td>{supplier.totalProductCount}</td>
               </tr>
             )
           })}
