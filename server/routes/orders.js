@@ -50,7 +50,7 @@ router.post('/orders/filter', async (req, res, next) => {
             })
         }
 
-        if (customerIdFilter && !isNaN(customerIdFilter)) {
+        if (customerIdFilter) {
             orderFilters.push({
                 customerId: customerIdFilter
             })
@@ -114,7 +114,8 @@ router.post('/orders/filter', async (req, res, next) => {
             include: [],
             where: Sequelize.and(...orderFilters),
             limit: size,
-            offset: page * size
+            offset: (page - 1) * size,
+            distinct: true
         };
         queryOptions.include.push({
             model: Product,
