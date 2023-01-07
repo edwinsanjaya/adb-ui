@@ -4,7 +4,7 @@ const { pool, sequelize } = require('../db.js')
 
 router.get('/dashboard/top-ten-county-by-order', async (req, res) => {
   try {
-    const counties = await pool.query("SELECT tc.countyname AS taiwan_county, Count(o.rg_id) AS sum_order FROM taiwan_county AS tc JOIN orders AS o ON st_contains(tc.geom, o.shipping_geom) GROUP BY taiwan_county ORDER BY sum_order DESC LIMIT 10")
+    const counties = await pool.query("SELECT tc.countyname AS taiwan_county, COUNT(o.rg_id) AS total_order FROM taiwan_county AS tc JOIN orders AS o ON ST_Contains(tc.geom, o.shipping_geom) GROUP BY taiwan_county ORDER BY total_order DESC LIMIT 10")
     res.json(counties.rows)
   } catch (error) {
     console.log(error);
