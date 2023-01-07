@@ -107,13 +107,13 @@ router.post('/orders/filter', async (req, res, next) => {
             if (!!cancelledFilter) {
                 cancelOrderFilter.push({
                     rgId: {
-                        [Op.is]: null
+                        [Op.not]: null
                     }
                 })
             } else {
                 cancelOrderFilter.push({
                     rgId: {
-                        [Op.not]: null
+                        [Op.is]: null
                     }
                 })
             }
