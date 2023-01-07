@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
+import mapboxgl, { LngLat } from 'mapbox-gl';
 import './MapBoxPage.scss';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import axios from 'axios'
@@ -44,6 +44,8 @@ function SupplierMapPage(props) {
   const [counties, setCounties] = useState([])
   const [towns, setTowns] = useState([])
 
+  const [status, setStatus] = ("")
+
   const dummy = [
     {
       "location": "Hsinchu Park",
@@ -82,7 +84,6 @@ function SupplierMapPage(props) {
       town: search.town,
       county: search.county
     }
-
     const response = await axios.post(url, data);
     setSuppliers(response.data)
   }
@@ -96,7 +97,7 @@ function SupplierMapPage(props) {
   }, [inputs.county])
 
   useEffect(() => {
-    if (map.current) return; // initialize map only once
+    // if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/edwinsanjaya/clcjf0p3x00n114oxbaidcqot',
@@ -110,9 +111,8 @@ function SupplierMapPage(props) {
         .setHTML('<h4>' + supplier.supplier_name + '</h4>' + supplier.supplier_address + " " + supplier.supplier_zipcode)
 
       var marker = new mapboxgl.Marker()
-        .setLngLat([supplier.longitude, supplier.latitute])
+        .setLngLat(supplier.supplier_geom.coordinates)
         .setPopup(popup)
-
         .addTo(map.current)
     });
   }, [suppliers]);
@@ -212,7 +212,7 @@ function SupplierMapPage(props) {
           </Select>
         </FormControl>
         <Button variant="contained" onClick={handleSearch}>Search</Button>
-        <div>{JSON.stringify(suppliers)}</div>
+        {/* <div>{JSON.stringify(suppliers)}</div> */}
       </div>
       <div ref={mapContainer} className="map-container" />
     </div>
