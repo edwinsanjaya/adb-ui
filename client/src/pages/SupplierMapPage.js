@@ -26,7 +26,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 mapboxgl.accessToken = 'pk.eyJ1IjoiZWR3aW5zYW5qYXlhIiwiYSI6ImNsY2pnODFnNzBpanYzdm10eDVhbnVnN2kifQ.IQwREZ9VVrx7vTe8s57i3Q';
 
 var search = {
-  country: "",
+  county: "",
   town: "",
   startTime: 0,
   endTime: 0
@@ -36,7 +36,7 @@ function SupplierMapPage(props) {
 
   const [suppliers, setSuppliers] = useState([])
   const [startTime, setStartTime] = useState(dayjs('2010-01-01T00:00:01'))
-  const [endTime, setEndTime] = useState(dayjs('2011-01-01T00:00:01'))
+  const [endTime, setEndTime] = useState(dayjs('2012-01-01T00:00:01'))
   const [inputs, setInputs] = useState({
     county: "",
     town: ""
@@ -69,12 +69,31 @@ function SupplierMapPage(props) {
   }
 
   const getTowns = async () => {
-    const url = 'http://localhost:'
+    const url = 'http://localhost:5000/regions/counties/' + inputs.county + '/towns'
+    const response = await axios.get(url);
+    setTowns(response.data)
+  }
+
+  async function getSuppliers() {
+    const url = 'http://localhost:5000/suppliers/filter/region-order-period'
+    const data = {
+      startPeriod: search.startTime,
+      endPeriod: search.endTime,
+      town: search.town,
+      county: search.county
+    }
+
+    const response = await axios.post(url, data);
+    setSuppliers(response.data)
   }
 
   useEffect(() => {
     getCounties()
   }, []);
+
+  useEffect(() => {
+    getTowns()
+  }, [inputs.county])
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -109,10 +128,18 @@ function SupplierMapPage(props) {
     });
   }
 
+  function handleSearch(event) {
+    search.startTime = startTime.valueOf()
+    search.endTime = endTime.valueOf()
+    search.county = inputs.county
+    search.town = inputs.town
+    getSuppliers()
+  }
+
   return (
     <div>
-      <div>{JSON.stringify(startTime)} {JSON.stringify(endTime)} {JSON.stringify(inputs)}</div>
-      <div>{JSON.stringify(counties)}</div>
+      {/* <div>{JSON.stringify(startTime)} {JSON.stringify(endTime)} {JSON.stringify(inputs)}</div>
+      <div>{JSON.stringify(counties)}</div> */}
       <div className="search-container">
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Stack spacing={3}>
@@ -154,7 +181,7 @@ function SupplierMapPage(props) {
             {
               counties.map((county, index) => {
                 return(
-                  <MenuItem key={index} value={county.countyid}>{county.countyeng}</MenuItem>
+                  <MenuItem key={index} value={county.countyeng}>{county.countyeng}</MenuItem>
                 )
               })
             }
@@ -176,15 +203,16 @@ function SupplierMapPage(props) {
               <em>None</em>
             </MenuItem>
             {
-              counties.map((county, index) => {
+              towns.map((town, index) => {
                 return(
-                  <MenuItem key={index} value={county.countyid}>{county.countyeng}</MenuItem>
+                  <MenuItem key={index} value={town.towneng}>{town.towneng}</MenuItem>
                 )
               })
             }
           </Select>
         </FormControl>
-        <Button variant="contained">Search</Button>
+        <Button variant="contained" onClick={handleSearch}>Search</Button>
+        <div>{JSON.stringify(suppliers)}</div>
       </div>
       <div ref={mapContainer} className="map-container" />
     </div>
