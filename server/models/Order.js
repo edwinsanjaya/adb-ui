@@ -85,20 +85,4 @@ Order.init({
     sequelize
 });
 
-Order.belongsTo(Product, {
-    foreignKey: 'productId',
-    targetKey: 'productId',
-    as: 'product'
-});
-
-CancelOrder.belongsTo(Order, {
-    foreignKey: 'rgId',
-    targetKey: 'rgId'
-})
-
-Order.hasOne(CancelOrder, {
-    foreignKey: 'rgId',
-    as: 'cancelOrder'
-})
-
 module.exports = Order

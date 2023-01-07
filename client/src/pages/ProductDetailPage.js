@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { Table } from 'reactstrap'
 
 function ProductDetailPage(props) {
@@ -61,7 +61,7 @@ function ProductDetailPage(props) {
             return (
               <tr key={index}>
                 <td>{supplier.supplier_id}</td>
-                <td>{supplier.supplier_name}</td>
+                <td><Link to={"/supplier/" + product.supplier_id + "/detail"}>{supplier.supplier_name}</Link></td>
                 <td>{supplier.total_products}</td>
               </tr>
             )

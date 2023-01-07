@@ -17,7 +17,7 @@ function SupplierSearchPage(props) {
     totalItems: 0,
     page: 1,
     size: 50,
-    rng: "",
+    rng: 1,
   })
 
   const [inputs, setInputs] = useState({
@@ -102,8 +102,8 @@ function SupplierSearchPage(props) {
 
   return (
     <div>
-      <div>State: {JSON.stringify(state)}</div>
-      <div>Input: {JSON.stringify(inputs)}</div>
+      {/* <div>State: {JSON.stringify(state)}</div>
+      <div>Input: {JSON.stringify(inputs)}</div> */}
       <Form>
         <FormGroup row>
           <Label for="supplier_name" sm={2}>Supplier Name</Label>
@@ -116,7 +116,7 @@ function SupplierSearchPage(props) {
             <Input type="text" name="supplierAddress" id="supplier_address" value={inputs.supplierAddress} onChange={handleInputChange} placeholder="Search by Supplier Address" />
           </Col>
 
-          <Label for="taiwan_country" sm={2}>Supplier Address</Label>
+          <Label for="taiwan_country" sm={2}>County</Label>
           <Col sm={10}>
             <Input type="text" name="taiwanCountry" id="taiwan_country" value={inputs.taiwanCountry} onChange={handleInputChange} placeholder="Search by Taiwan Country" />
           </Col>
@@ -150,8 +150,8 @@ function SupplierSearchPage(props) {
                 <td>{supplier.supplierId}</td>
                 <td><Link to={"/supplier/" + supplier.supplierId + "/detail"}>{supplier.supplierName}</Link></td>
                 <td>{supplier.supplierAddress}</td>
-                <td></td>
-                <td></td>
+                <td>{supplier.totalOrderCount}</td>
+                <td>{supplier.totalProductCount}</td>
               </tr>
             )
           })}
@@ -172,7 +172,6 @@ function SupplierSearchPage(props) {
         Page: {state.page} of {state.pages}
       </div>
       <div>
-
         <div>Test state: {JSON.stringify(state)}</div>
       </div>
     </div>

@@ -6,10 +6,49 @@ const { pool, sequelize } = require("./db")
 const products = require("./routes/products")
 const suppliers = require("./routes/suppliers")
 const orders = require("./routes/orders")
+const dashboard = require("./routes/dashboard")
+const region = require("./routes/region")
+
+const Product = require("./models/Product")
+const Supplier = require("./models/Supplier")
+const CancelOrder = require("./models/CancelOrder");
+const Order = require("./models/Order")
+
+Supplier.hasMany(Product, {
+  foreignKey: 'supplierId',
+  as: 'products'
+})
+
+Product.belongsTo(Supplier, {
+  foreignKey: 'supplierId',
+  targetKey: 'supplierId',
+  as: 'supplier'
+})
+
+Order.belongsTo(Product, {
+  foreignKey: 'productId',
+  targetKey: 'productId',
+  as: 'product'
+});
+
+Product.hasMany(Order, {
+  foreignKey: 'productId',
+  as: 'orders'
+})
+
+Order.hasOne(CancelOrder, {
+  foreignKey: 'rgId',
+  as: 'cancelOrder'
+})
+
+CancelOrder.belongsTo(Order, {
+  foreignKey: 'rgId',
+  targetKey: 'rgId'
+})
 
 // Middleware
 app.use(cors());
-app.use(express.json())
+app.use(express.json());
 
 // Sequelize
 sequelize.authenticate()
@@ -20,6 +59,8 @@ sequelize.authenticate()
 app.use(products)
 app.use(suppliers)
 app.use(orders)
+app.use(dashboard)
+app.use(region)
 
 app.post("/query", async (req, res) => {
   try {
@@ -50,6 +91,11 @@ app.get("/product/:product_id", async (req, res) => {
     console.error(err.message)
   }
 })
+
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.status(500).send(err.message);
+});
 
 app.listen(5000, () => {
   console.log("server has started on port 5000")
