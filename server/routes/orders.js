@@ -116,28 +116,24 @@ router.post('/orders/filter', async (req, res, next) => {
             limit: size,
             offset: page * size
         };
-        if (productFilters.length > 0 || supplierFilter.length > 0) {
-            queryOptions.include.push({
-                model: Product,
-                as: 'product',
-                required: productFilters.length > 0,
-                where: Sequelize.and(...productFilters),
-                include: [{
-                    model: Supplier,
-                    as: 'supplier',
-                    required: supplierFilter.length > 0,
-                    where: Sequelize.and(...supplierFilter)
-                }]
-            })
-        }
-        if (cancelOrderFilter.length > 0) {
-            queryOptions.include.push({
-                model: CancelOrder,
-                as: 'cancelOrder',
-                required: !!cancelledFilter || cancelOrderFilter.length > 0,
-                where: Sequelize.and(...cancelOrderFilter)
-            })
-        }
+        queryOptions.include.push({
+            model: Product,
+            as: 'product',
+            required: productFilters.length > 0,
+            where: Sequelize.and(...productFilters),
+            include: [{
+                model: Supplier,
+                as: 'supplier',
+                required: supplierFilter.length > 0,
+                where: Sequelize.and(...supplierFilter)
+            }]
+        })
+        queryOptions.include.push({
+            model: CancelOrder,
+            as: 'cancelOrder',
+            required: !!cancelledFilter || cancelOrderFilter.length > 0,
+            where: Sequelize.and(...cancelOrderFilter)
+        })
         if (orderBy.length > 0) {
             queryOptions.order = [orderBy]
         }
