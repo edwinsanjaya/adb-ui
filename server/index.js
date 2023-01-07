@@ -28,14 +28,14 @@ Order.belongsTo(Product, {
   as: 'product'
 });
 
-CancelOrder.belongsTo(Order, {
-  foreignKey: 'rgId',
-  targetKey: 'rgId'
-})
-
 Order.hasOne(CancelOrder, {
   foreignKey: 'rgId',
   as: 'cancelOrder'
+})
+
+CancelOrder.belongsTo(Order, {
+  foreignKey: 'rgId',
+  targetKey: 'rgId'
 })
 
 // Middleware

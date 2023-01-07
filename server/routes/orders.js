@@ -99,7 +99,7 @@ router.post('/orders/filter', async (req, res) => {
     const cancelOrderFilter = [];
     if (cancelReasonFilter) {
         cancelOrderFilter.push({
-            cancelReason: cancelOrderFilter
+            cancelReason: cancelReasonFilter
         })
     }
 
