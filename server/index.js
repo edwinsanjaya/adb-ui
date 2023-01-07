@@ -7,6 +7,7 @@ const products = require("./routes/products")
 const suppliers = require("./routes/suppliers")
 const orders = require("./routes/orders")
 const dashboard = require("./routes/dashboard")
+const region = require("./routes/region")
 
 const Product = require("./models/Product")
 const Supplier = require("./models/Supplier")
@@ -59,6 +60,7 @@ app.use(products)
 app.use(suppliers)
 app.use(orders)
 app.use(dashboard)
+app.use(region)
 
 app.post("/query", async (req, res) => {
   try {
