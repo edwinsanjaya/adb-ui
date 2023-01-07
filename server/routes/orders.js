@@ -120,7 +120,7 @@ router.post('/orders/filter', async (req, res, next) => {
         queryOptions.include.push({
             model: Product,
             as: 'product',
-            required: productFilters.length > 0,
+            required: productFilters.length > 0 || supplierFilter.length > 0,
             where: Sequelize.and(...productFilters),
             include: [{
                 model: Supplier,
