@@ -44,6 +44,9 @@ Product.init({
   },
   fileSource: {
     type: DataTypes.STRING
+  },
+  warehouseCompany: {
+    type: DataTypes.STRING
   }
 },{
   updatedAt: false,
