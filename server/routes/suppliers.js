@@ -60,6 +60,20 @@ router.post('/suppliers/filter', async (req, res) => {
     totalCount = await Supplier.count({
         where: Sequelize.and(...filter)
     })
+    for (let supplier of suppliers) {
+        const [orderCountResult, orderCountMetadata] = await sequelize.query(`select count(*)
+                                                           from products p
+                                                                    inner join orders o on p.product_id = o.product_id
+                                                           where p.supplier_id = '${supplier.dataValues.supplierId}'`)
+        const totalOrderCount = orderCountResult[0].count
+        supplier.dataValues.totalOrderCount = Number(totalOrderCount)
+
+        const [productCountResult, productCountMetadata] = await sequelize.query(`select count(*)
+                                                           from products p
+                                                           where p.supplier_id = '${supplier.dataValues.supplierId}'`)
+        const totalProductCount = productCountResult[0].count
+        supplier.dataValues.totalProductCount = Number(totalProductCount)
+    }
     const response = {
         content: suppliers,
         metadata: {
@@ -69,7 +83,6 @@ router.post('/suppliers/filter', async (req, res) => {
         }
     }
     res.send(response)
-
 })
 
 module.exports = router;
