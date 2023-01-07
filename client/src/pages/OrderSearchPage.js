@@ -1,19 +1,70 @@
 import React, {useEffect, useState} from 'react';
-import {Table, Col, Button, Form, FormGroup, Label, Input, FormText} from 'reactstrap';
+import {Table, Col, Button, Form, FormGroup, Label, Input, FormFeedback} from 'reactstrap';
 import {Link} from 'react-router-dom';
 import axios from 'axios';
-import {Pagination, TablePagination, FormControl, InputLabel, Select, MenuItem} from '@mui/material'
+import {
+    Pagination,
+    TablePagination,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    Autocomplete,
+    TextField
+} from '@mui/material'
+
+var inputLabelStyle = {
+    width: "100%",
+    'textAlign': 'left'
+}
+
+const constantTown = [{
+    label: "kota1",
+    value:"kota1-val",
+    id: 1
+}, {
+    label: "kota2",
+    value:"kota2-val",
+    id: 2
+}]
+
+const constantCountry = [{
+    label: "KONTRY 1",
+    value:"KONTRY1-val",
+
+    id: 1
+}, {
+    label: "KONTRY 2",
+    value:"KONTRY2-val",
+    id: 2
+}]
+
+const constantZipcode = [{
+    label: "14450",
+    value: "14450",
+    id: 1
+}, {
+    label: "12345",
+    value: "12345",
+    id: 2
+}]
 
 var search = {
     orderId: "",
     productName: "",
     customerId: "",
-    supplierId: null,
-    orderPeriod: 0,
-    shippingZipCode: 0,
-    county: "",
-    town: "",
-    cancelled: null,
+    supplierId: "",
+    orderPeriod: "",
+    zipCode: {
+        value:null,
+    },
+    county: {
+        value:null,
+    },
+    town: {
+        value:null,
+    },
+    cancelled: 0,
     cancelReason: "",
     pages: 0,
 }
@@ -30,41 +81,54 @@ function OrderSearchPage(props) {
         orderId: "",
         productName: "",
         customerId: "",
-        supplierId: 0,
-        orderPeriod: 0,
-        shippingZipCode: 0,
-        county: "",
-        town: "",
-        cancelled: null,
+        supplierId: "",
+        orderPeriod: "",
+        zipCode: {
+            value:null,
+        },
+        county: {
+            value:null,
+        },
+        town: {
+            value:null,
+        },
+        cancelled: 0,
         cancelReason: "",
+        errorMap: {}
     })
-    // const rgIdFilter = body.rgId; orderId
-    // const productFilter = body.product; productName
-    // const customerIdFilter = body.customerId; customerId
-    // const supplierIdFilter = body.supplier; supplierId
-    // const periodFilter = body.period; orderPeriod
-    // const zipCodeFilter = body.zipCode; shippingZipCode
-    // const countyFilter = body.county; county
-    // const townFilter = body.town; town
-    // const cancelledFilter = body.cancelled;
-    // const cancelReasonFilter = body.cancelReason;
 
     const [orders, setOrders] = useState([]);
 
     async function searchOrders() {
         const url = 'http://localhost:5000/orders/filter'
+
+        const period = new Date(search.orderPeriod).valueOf()
+        let cancelled = null
+        switch (search.cancelled) {
+            case 1:
+                cancelled = true
+                break
+            case 2:
+                cancelled = false
+                break
+        }
+
+        console.log('This is search')
+        console.log(search)
         const data = {
             rgId: search.orderId,
             product: search.productName,
             customerId: search.customerId,
             supplier: search.supplierId,
             period: search.orderPeriod,
-            zipCode: search.shippingZipCode,
-            county: search.county,
-            town: search.town,
-            cancelled: search.cancelled,
-            cancelReason: search.cancelReason
+            zipCode: search.zipCode.value,
+            county: search.county.value,
+            town: search.town.value,
+            cancelled: cancelled,
+            // cancelReason: search.cancelReason
         }
+
+        console.log(data)
 
         const data2 = {}
         const config = {
@@ -96,17 +160,69 @@ function OrderSearchPage(props) {
         const target = event.target;
         const value = target.type === 'checkbox' ? target.checked : target.value
         const name = target.name
+        let errorMap = inputs.errorMap
+        errorMap[name] = validateInput(value, name)
+        setInputs({
+            ...inputs,
+            errorMap: errorMap,
+            [name]: value
+        })
+    }
 
+    function handleSelectAutoComplete(event, value) {
+        const name = value.name
         setInputs({
             ...inputs,
             [name]: value
-        });
+        })
     }
 
+    function validateInput(value, type) {
+        switch (type) {
+            case 'orderPeriod': {
+                let regex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/g
+                if (!regex.test(value)) {
+                    return "Is not a valid date"
+                }
+                break
+            }
+            case 'supplierId': {
+                let regex = /^-?\d+$/
+                if (!regex.test(value)) {
+                    return "Supplier Id must be a valid number"
+                }
+                break
+            }
+            case 'shippingZipCode': {
+                let regex = /^-?\d+$/
+                if (!regex.test(value)) {
+                    return "Shipping Zip Code must be a valid number"
+                }
+                break
+            }
+        }
+    }
+
+
     function handleSearch(event) {
-        search.supplierName = inputs.supplierName
-        search.supplierAddress = inputs.supplierAddress
-        search.taiwanCountry = inputs.taiwanCountry
+        const anyErr = Object.keys(inputs.errorMap).filter(key => !!inputs.errorMap[key])
+        if (anyErr.length > 0){
+            alert("Found Validation Error")
+            console.error(inputs.errorMap)
+            return
+        }
+
+        console.log(inputs)
+
+        search.orderId = inputs.orderId
+        search.productName = inputs.productName
+        search.customerId = inputs.customerId
+        search.supplierId = inputs.supplierId
+        search.orderPeriod = inputs.orderPeriod
+        search.zipCode = inputs.zipCode
+        search.county = inputs.county
+        search.town = inputs.town
+        search.cancelled= inputs.cancelled
 
         setState({
             ...state,
@@ -139,72 +255,113 @@ function OrderSearchPage(props) {
 
             <Form>
                 <FormGroup row>
-                    <div style={{display:'flex'}}>
-                        <div style={{width:'100%'}}>
-                            <Label for="order_id" sm={2}>Order ID</Label>
-                            <Col sm={10}>
-                                <Input type="text" name="orderId" id="order_id" value={inputs.orderId}
-                                       onChange={handleInputChange} placeholder="Search By Order ID"/>
-                            </Col>
+                    <div style={{display: 'flex'}}>
+                        <div style={{width: '100%'}}>
+                            <div>
+                                <Label for="order_id" sm={2} style={inputLabelStyle}>Order ID</Label>
+                                <Col sm={10}>
+                                    <Input type="text" name="orderId" id="order_id" value={inputs.orderId}
+                                           onChange={handleInputChange} placeholder="Search By Order ID"/>
+                                </Col>
+                            </div>
 
-                            <Label for="product_name" sm={2}>Product Name</Label>
+                            <Label for="product_name" sm={2} style={inputLabelStyle}>Product Name</Label>
                             <Col sm={10}>
                                 <Input type="text" name="productName" id="product_name" value={inputs.productName}
                                        onChange={handleInputChange} placeholder="Search Product Name"/>
                             </Col>
 
-                            <Label for="customer_id" sm={2}>Customer ID</Label>
+                            <Label for="customer_id" sm={2} style={inputLabelStyle}>Customer ID</Label>
                             <Col sm={10}>
                                 <Input type="text" name="customerId" id="customer_id" value={inputs.customerId}
                                        onChange={handleInputChange} placeholder="Search Customer ID"/>
                             </Col>
 
-                            <Label for="supplier_id" sm={2}>Supplier ID</Label>
+                            <Label for="supplier_id" sm={2} style={inputLabelStyle}>Supplier ID</Label>
                             <Col sm={10}>
                                 <Input type="text" name="supplierId" id="supplier_id" value={inputs.supplierId}
-                                       onChange={handleInputChange} placeholder="Search By Supplier ID"/>
+                                       onChange={handleInputChange}
+                                       invalid={!!inputs.errorMap['supplierId']}
+                                       placeholder="Search By Supplier ID"/>
+                                <FormFeedback
+                                    style={inputLabelStyle}
+                                    text={inputs.errorMap['supplierId']}>{inputs.errorMap['supplierId']}</FormFeedback>
                             </Col>
-                        </div>
-                        <div style={{width:'100%'}}>
-                            <Label for="order_period" sm={1}>Order Period</Label>
+
+                            <Label for="order_period" sm={1} style={inputLabelStyle}>Order Period</Label>
                             <Col sm={10}>
                                 <Input type="text" name="orderPeriod" id="order_period" value={inputs.orderPeriod}
-                                       onChange={handleInputChange} placeholder="Search Order Period"/>
+                                       onChange={handleInputChange} placeholder="Input Order Period (YYYY-MM-DD)"
+                                       invalid={!!inputs.errorMap['orderPeriod']}/>
+                                <FormFeedback
+                                    style={inputLabelStyle}
+                                    text={inputs.errorMap['orderPeriod']}>{inputs.errorMap['orderPeriod']}</FormFeedback>
                             </Col>
-
-                            <Label for="shipping_zip_code" sm={2}>Shipping Zip Code</Label>
+                        </div>
+                        <div style={{width: '100%'}}>
+                            <Label for="shipping_zip_code" sm={2} style={inputLabelStyle}>Shipping Zip Code</Label>
                             <Col sm={10}>
-                                <Input type="number" name="shippingZipCode" id="shipping_zip_code"
-                                       value={inputs.shippingZipCode} onChange={handleInputChange}
-                                       placeholder="Shipping Zip Code"/>
+                                <Autocomplete
+                                    disablePortal
+                                    id="zipcode-select"
+                                    name="zipcode"
+                                    options={constantZipcode}
+                                    onChange={(e, value) => {
+                                        value.name = "zipCode"
+                                        handleSelectAutoComplete(e, value)
+                                    }}
+                                    label="ZipCode"
+                                    renderInput={(params) => <TextField {...params}  />}
+                                />
                             </Col>
 
-                            <Label for="county" sm={2}>County</Label>
+                            <Label for="county" sm={2} style={inputLabelStyle}>County</Label>
                             <Col sm={10}>
-                                <Input type="text" name="county" id="county" value={inputs.county} onChange={handleInputChange}
-                                       placeholder="Search By County"/>
+                                <Autocomplete
+                                    disablePortal
+                                    id="country-select"
+                                    name="country"
+                                    options={constantCountry}
+                                    onChange={(e, value) => {
+                                        value.name = "county"
+                                        handleSelectAutoComplete(e, value)
+                                    }}
+                                    label="Town"
+                                    renderInput={(params) => <TextField {...params}  />}
+                                />
                             </Col>
 
-                            <Label for="town" sm={2}>Town</Label>
+                            <Label for="town" sm={2} style={inputLabelStyle}>Town</Label>
                             <Col sm={10}>
-                                <Input type="text" name="town" id="town" value={inputs.town} onChange={handleInputChange}
-                                       placeholder="Search By Town"/>
+                                <Autocomplete
+                                    disablePortal
+                                    id="town-select"
+                                    name="town"
+                                    options={constantTown}
+                                    onChange={(e, value) => {
+                                        value.name = "town"
+                                        handleSelectAutoComplete(e, value)
+                                    }}
+                                    label="Town"
+                                    renderInput={(params) => <TextField {...params}  />}
+                                />
                             </Col>
 
-                            <Label for="is_cancelled" sm={2}>Is Cancelled</Label>
+                            <Label for="is_cancelled" sm={2} style={inputLabelStyle}>Is Cancelled</Label>
                             <Col sm={10}>
                                 <FormControl fullWidth>
                                     <InputLabel id="is_cancelled">Is Canceled</InputLabel>
                                     <Select
+                                        name="cancelled"
                                         labelId="is_cancelled"
                                         id="is_cancelled-select"
-                                        // value={rng}
-                                        label="Age"
-                                        // onChange={handleChange}
+                                        value={inputs.cancelled}
+                                        label="isCancelled"
+                                        onChange={handleInputChange}
                                     >
-                                        <MenuItem value={null}>N/A</MenuItem>
-                                        <MenuItem value={true}>Cancelled</MenuItem>
-                                        <MenuItem value={false}>Not Cancelled</MenuItem>
+                                        <MenuItem value={0}>N/A</MenuItem>
+                                        <MenuItem value={1}>Cancelled</MenuItem>
+                                        <MenuItem value={2}>Not Cancelled</MenuItem>
                                     </Select>
                                 </FormControl>
                             </Col>
@@ -220,11 +377,12 @@ function OrderSearchPage(props) {
             <Table>
                 <thead>
                 <tr>
-                    <th scope="col">Supplier ID</th>
-                    <th scope="col">Supplier Name</th>
-                    <th scope="col">Address</th>
-                    <th scope="col">Total Order</th>
-                    <th scope="col">Total Product</th>
+                    <th scope="col">Order ID</th>
+                    <th scope="col">Order Time</th>
+                    <th scope="col">Product</th>
+                    <th scope="col">Customer ID</th>
+                    <th scope="col">Supplier</th>
+                    <th scope="col">Status</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -237,8 +395,7 @@ function OrderSearchPage(props) {
                             <td>{orderData.product.productName}</td>
                             <td>{orderData.customerId}</td>
                             <td>{orderData.product.supplier.supplierName}</td>
-                            <td>{orderData.customerId}</td>
-                            <td>{orderData.cancelOrder === null}</td>
+                            <td>{orderData.cancelOrder.length === 0 ? 'Not Cancelled' : 'Cancelled'}</td>
                         </tr>
                     )
                 })}
