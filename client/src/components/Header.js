@@ -34,7 +34,7 @@ function Header(args) {
               </DropdownToggle>
               <DropdownMenu end>
                 <DropdownItem href="/suppliers/search">Search</DropdownItem>
-                <DropdownItem>Map</DropdownItem>
+                <DropdownItem href="/suppliers/map">Map</DropdownItem>
                 <DropdownItem divider />
                 <DropdownItem>Reset</DropdownItem>
               </DropdownMenu>

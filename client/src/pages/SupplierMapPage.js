@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import './MapBoxPage.scss';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import axios from 'axios'
 
 import dayjs from 'dayjs';
 
@@ -40,6 +41,8 @@ function SupplierMapPage(props) {
     county: "",
     town: ""
   })
+  const [counties, setCounties] = useState([])
+  const [towns, setTowns] = useState([])
 
   const dummy = [
     {
@@ -58,6 +61,20 @@ function SupplierMapPage(props) {
     zoom: 7,
     rng: 1
   })
+
+  const getCounties = async () => {
+    const url = 'http://localhost:5000/region/county'
+    const response = await axios.get(url);
+    setCounties(response.data)
+  }
+
+  const getTowns = async () => {
+    const url = 'http://localhost:'
+  }
+
+  useEffect(() => {
+    getCounties()
+  }, []);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -95,6 +112,7 @@ function SupplierMapPage(props) {
   return (
     <div>
       <div>{JSON.stringify(startTime)} {JSON.stringify(endTime)} {JSON.stringify(inputs)}</div>
+      <div>{JSON.stringify(counties)}</div>
       <div className="search-container">
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Stack spacing={3}>
@@ -121,7 +139,7 @@ function SupplierMapPage(props) {
           </Stack>
         </LocalizationProvider>
         <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-          <InputLabel id="county">Age</InputLabel>
+          <InputLabel id="county">County</InputLabel>
           <Select
             name="county"
             labelId="county"
@@ -133,9 +151,37 @@ function SupplierMapPage(props) {
             <MenuItem value="">
               <em>None</em>
             </MenuItem>
-            <MenuItem value={10}>Ten</MenuItem>
-            <MenuItem value={20}>Twenty</MenuItem>
-            <MenuItem value={30}>Thirty</MenuItem>
+            {
+              counties.map((county, index) => {
+                return(
+                  <MenuItem key={index} value={county.countyid}>{county.countyeng}</MenuItem>
+                )
+              })
+            }
+          </Select>
+        </FormControl>
+
+
+        <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+          <InputLabel id="town">Town</InputLabel>
+          <Select
+            name="town"
+            labelId="town"
+            id="town"
+            value={inputs.town}
+            onChange={handleInputChange}
+            label="Town"
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            {
+              counties.map((county, index) => {
+                return(
+                  <MenuItem key={index} value={county.countyid}>{county.countyeng}</MenuItem>
+                )
+              })
+            }
           </Select>
         </FormControl>
         <Button variant="contained">Search</Button>
