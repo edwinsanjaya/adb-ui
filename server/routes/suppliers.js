@@ -42,9 +42,9 @@ router.post("/suppliers/filter/region-order-period", async (req, res, next) => {
                                                       AND o.order_time <= '${endPeriod}' `
         let additionalQuery = ''
         if (town?.length > 0) {
-            additionalQuery += `AND ST_Within(s.supplier_geom, (SELECT geom FROM taiwan_town WHERE towneng = '${town}'))`
+            additionalQuery += `AND ST_Within(s.supplier_geom, (SELECT geom FROM taiwan_town WHERE towneng = '${town}' LIMIT 1))`
         } else if (county?.length > 0) {
-            additionalQuery += `AND ST_Within(s.supplier_geom, (SELECT geom FROM taiwan_county WHERE countyeng = '${county}'))`
+            additionalQuery += `AND ST_Within(s.supplier_geom, (SELECT geom FROM taiwan_county WHERE countyeng = '${county}' LIMIT 1))`
         }
         query += ` ${additionalQuery} GROUP BY s.supplier_id ORDER BY total_orders DESC`
         const [result, metadata] = await sequelize.query(query)
