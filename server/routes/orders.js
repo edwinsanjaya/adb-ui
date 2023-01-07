@@ -50,7 +50,7 @@ router.post('/orders/filter', async (req, res, next) => {
             })
         }
 
-        if (!isNaN(customerIdFilter)) {
+        if (customerIdFilter && !isNaN(customerIdFilter)) {
             orderFilters.push({
                 customerId: customerIdFilter
             })
@@ -75,7 +75,7 @@ router.post('/orders/filter', async (req, res, next) => {
         const productFilters = [];
         if (productFilter) {
             productOrFilter = []
-            if (!isNaN(productFilter)) {
+            if (productFilter && !isNaN(productFilter)) {
                 productOrFilter.push({
                     productId: Number(productFilter)
                 })
@@ -91,7 +91,7 @@ router.post('/orders/filter', async (req, res, next) => {
         }
 
         const supplierFilter = [];
-        if (!isNaN(supplierIdFilter)) {
+        if (supplierIdFilter && !isNaN(supplierIdFilter)) {
             supplierFilter.push({
                 supplierId: supplierIdFilter
             })
