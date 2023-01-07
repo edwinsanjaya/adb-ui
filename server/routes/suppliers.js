@@ -16,7 +16,6 @@ router.get('/suppliers/product_id/:product_id', async (req, res) => {
 })
 
 router.post('/suppliers/filter', async (req, res) => {
-    throw new Error("error")
     const page = req.query.page;
     const size = req.query.size;
     const body = req.body;
