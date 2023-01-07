@@ -116,6 +116,14 @@ router.post('/suppliers/filter', async (req, res) => {
         }]
     }
 
+    const sortedBy = body.sortedBy;
+    const sortDirection = body.sortDirection;
+    if (sortedBy && sortDirection) {
+        findOptions.order = [
+            [sortedBy, sortDirection]
+        ]
+    }
+
     const suppliers = await Supplier.findAll(findOptions)
 
     delete findOptions.limit
