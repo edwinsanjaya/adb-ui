@@ -28,6 +28,33 @@ router.get('/supplier/:supplier_id', async (req, res) => {
   }
 })
 
+router.post("/suppliers/filter/region-order-period", async (req, res, next) => {
+    try {
+        const startPeriod = new Date(req.body.startPeriod).toISOString()
+        const endPeriod = new Date(req.body.endPeriod).toISOString()
+        const county = req.body.county
+        const town = req.body.town
+        let query = `SELECT s.*, COUNT(o.rg_id) as total_orders
+                                                    FROM suppliers s
+                                                             JOIN products p ON s.supplier_id = p.supplier_id
+                                                             JOIN orders o ON p.product_id = o.product_id
+                                                    WHERE o.order_time >= '${startPeriod}'
+                                                      AND o.order_time <= '${endPeriod}' `
+        let additionalQuery = ''
+        if (town?.length > 0) {
+            additionalQuery += `AND ST_Within(s.supplier_geom, (SELECT geom FROM taiwan_town WHERE towneng = '${town}'))`
+        } else if (county?.length > 0) {
+            additionalQuery += `AND ST_Within(s.supplier_geom, (SELECT geom FROM taiwan_county WHERE countyeng = '${county}'))`
+        }
+        query += ` ${additionalQuery} GROUP BY s.supplier_id ORDER BY total_orders DESC`
+        const [result, metadata] = await sequelize.query(query)
+        console.log(result)
+        res.send(result)
+    } catch (e) {
+        next(e)
+    }
+})
+
 router.post('/suppliers/filter', async (req, res, next) => {
     try {
         const page = req.query.page;
