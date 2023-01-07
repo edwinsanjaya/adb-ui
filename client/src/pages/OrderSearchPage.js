@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {Table, Col, Button, Form, FormGroup, Label, Input, FormFeedback} from 'reactstrap';
 import {Link} from 'react-router-dom';
 import axios from 'axios';
+import CancelReason from '../constants/cancelReason';
+
 import {
     Pagination,
     TablePagination,
@@ -10,7 +12,7 @@ import {
     Select,
     MenuItem,
     Autocomplete,
-    TextField
+    TextField, TableCell
 } from '@mui/material'
 
 var inputLabelStyle = {
@@ -18,30 +20,9 @@ var inputLabelStyle = {
     'textAlign': 'left'
 }
 
-const constantTown = [{
-    label: "kota1",
-    value:"kota1-val",
-    id: 1
-}, {
-    label: "kota2",
-    value:"kota2-val",
-    id: 2
-}]
-
-const constantCountry = [{
-    label: "KONTRY 1",
-    value:"KONTRY1-val",
-
-    id: 1
-}, {
-    label: "KONTRY 2",
-    value:"KONTRY2-val",
-    id: 2
-}]
-
 const constantZipcode = [{
-    label: "14450",
-    value: "14450",
+    label: "111",
+    value: "111",
     id: 1
 }, {
     label: "12345",
@@ -56,13 +37,13 @@ var search = {
     supplierId: "",
     orderPeriod: "",
     zipCode: {
-        value:null,
+        value: null,
     },
     county: {
-        value:null,
+        value: null,
     },
     town: {
-        value:null,
+        value: null,
     },
     cancelled: 0,
     cancelReason: "",
@@ -84,13 +65,13 @@ function OrderSearchPage(props) {
         supplierId: "",
         orderPeriod: "",
         zipCode: {
-            value:null,
+            value: null,
         },
         county: {
-            value:null,
+            value: null,
         },
         town: {
-            value:null,
+            value: null,
         },
         cancelled: 0,
         cancelReason: "",
@@ -99,9 +80,12 @@ function OrderSearchPage(props) {
 
     const [orders, setOrders] = useState([]);
 
+    const [counties, setCounties] = useState([]);
+    const [towns, setTowns] = useState([]);
+    const [zipCodes, setZipCodes] = useState([]);
+
     async function searchOrders() {
         const url = 'http://localhost:5000/orders/filter'
-
         let cancelled = null
         switch (search.cancelled) {
             case 1:
@@ -111,20 +95,17 @@ function OrderSearchPage(props) {
                 cancelled = false
                 break
         }
-
-        console.log('This is search')
-        console.log(search)
-        const data = {
-            rgId: search.orderId,
-            product: search.productName,
-            customerId: search.customerId,
-            supplier: search.supplierId,
-            period: search.orderPeriod,
+        let data = {
+            rgId: !!search.orderId ? search.orderId : null,
+            product: !!search.productName ? search.productName : null,
+            customerId: !!search.customerId ? search.customerId : null,
+            supplier: !!search.supplierId ? search.supplierId : null,
+            period: !!search.orderPeriod ? new Date(search.orderPeriod).valueOf() : null,
             zipCode: search.zipCode.value,
             county: search.county.value,
             town: search.town.value,
             cancelled: cancelled,
-            // cancelReason: search.cancelReason
+            cancelReason: !!search.cancelReason ? search.cancelReason : null
         }
 
         const config = {
@@ -150,7 +131,57 @@ function OrderSearchPage(props) {
 
     useEffect(() => {
         searchOrders();
+        searchZipCode();
     }, [state.page, state.rng, state.size])
+
+    useEffect(() => {
+        searchCounty();
+    }, [])
+
+    async function searchCounty() {
+        const url = 'http://localhost:5000/regions/county'
+
+        const response = await axios.get(url, {});
+
+        let results = response.data.map(val => {
+            return {
+                ...val,
+                label: val.countyeng,
+                value: val.countyeng,
+            }
+        })
+        setCounties(results)
+    }
+
+    async function searchTownByCounty(countyName) {
+        const url = 'http://localhost:5000/regions/counties/' + countyName + '/towns'
+
+        const response = await axios.get(url, {});
+
+        let results = response.data.map(val => {
+            return {
+                ...val,
+                key: val.towneng,
+                label: val.towneng,
+                value: val.towneng,
+            }
+        })
+        setTowns(results)
+    }
+
+    async function searchZipCode() {
+        const url = 'http://localhost:5000/regions/zipcodes'
+        const response = await axios.get(url, {});
+
+        let results = response.data.map(val => {
+            return {
+                ...val,
+                label: val.zipcode,
+                value: val.zipcode,
+            }
+        })
+        setZipCodes(results)
+    }
 
     function handleInputChange(event) {
         const target = event.target;
@@ -173,19 +204,37 @@ function OrderSearchPage(props) {
         })
     }
 
+    function handleSelectZipCodes(event, value) {
+        const name = value.name
+        let county = {
+            countyid: value.countyid,
+            countyeng: value.countyeng,
+            label: value.countyeng,
+            value: value.countyeng,
+            name: 'county'
+        }
+        let town = {
+            towneng: value.townid,
+            key: value.towneng,
+            label: value.towneng,
+            value: value.towneng,
+            name: 'town'
+        }
+        setInputs({
+            ...inputs,
+            county: county,
+            town: town,
+            [name]: value
+        })
+        searchTownByCounty(value.countyeng)
+    }
+
     function validateInput(value, type) {
         switch (type) {
             case 'orderPeriod': {
                 let regex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/g
                 if (!regex.test(value)) {
                     return "Is not a valid date"
-                }
-                break
-            }
-            case 'supplierId': {
-                let regex = /^-?\d+$/
-                if (!regex.test(value)) {
-                    return "Supplier Id must be a valid number"
                 }
                 break
             }
@@ -202,13 +251,11 @@ function OrderSearchPage(props) {
 
     function handleSearch(event) {
         const anyErr = Object.keys(inputs.errorMap).filter(key => !!inputs.errorMap[key])
-        if (anyErr.length > 0){
+        if (anyErr.length > 0) {
             alert("Found Validation Error")
             console.error(inputs.errorMap)
             return
         }
-
-        console.log(inputs)
 
         search.orderId = inputs.orderId
         search.productName = inputs.productName
@@ -218,7 +265,8 @@ function OrderSearchPage(props) {
         search.zipCode = inputs.zipCode
         search.county = inputs.county
         search.town = inputs.town
-        search.cancelled= inputs.cancelled
+        search.cancelled = inputs.cancelled
+        search.cancelReason = inputs.cancelReason
 
         setState({
             ...state,
@@ -229,7 +277,6 @@ function OrderSearchPage(props) {
 
     function changePage(event, value) {
         const nextPage = value + 1
-        console.log(nextPage)
         setState({
             ...state,
             page: nextPage
@@ -246,9 +293,6 @@ function OrderSearchPage(props) {
 
     return (
         <div>
-            <div>State: {JSON.stringify(state)}</div>
-            <div>Input: {JSON.stringify(inputs)}</div>
-
             <Form>
                 <FormGroup row>
                     <div style={{display: 'flex'}}>
@@ -273,12 +317,12 @@ function OrderSearchPage(props) {
                                        onChange={handleInputChange} placeholder="Search Customer ID"/>
                             </Col>
 
-                            <Label for="supplier_id" sm={2} style={inputLabelStyle}>Supplier ID</Label>
+                            <Label for="supplier_id" sm={2} style={inputLabelStyle}>Supplier ID/ Name</Label>
                             <Col sm={10}>
                                 <Input type="text" name="supplierId" id="supplier_id" value={inputs.supplierId}
                                        onChange={handleInputChange}
                                        invalid={!!inputs.errorMap['supplierId']}
-                                       placeholder="Search By Supplier ID"/>
+                                       placeholder="Search By Supplier ID/Name"/>
                                 <FormFeedback
                                     style={inputLabelStyle}
                                     text={inputs.errorMap['supplierId']}>{inputs.errorMap['supplierId']}</FormFeedback>
@@ -301,10 +345,10 @@ function OrderSearchPage(props) {
                                     disablePortal
                                     id="zipcode-select"
                                     name="zipcode"
-                                    options={constantZipcode}
+                                    options={zipCodes}
                                     onChange={(e, value) => {
                                         value.name = "zipCode"
-                                        handleSelectAutoComplete(e, value)
+                                        handleSelectZipCodes(e, value)
                                     }}
                                     label="ZipCode"
                                     renderInput={(params) => <TextField {...params}  />}
@@ -315,14 +359,16 @@ function OrderSearchPage(props) {
                             <Col sm={10}>
                                 <Autocomplete
                                     disablePortal
-                                    id="country-select"
-                                    name="country"
-                                    options={constantCountry}
-                                    onChange={(e, value) => {
-                                        value.name = "county"
-                                        handleSelectAutoComplete(e, value)
+                                    id="county-select"
+                                    name="county"
+                                    value={inputs.county.value}
+                                    options={counties}
+                                    onChange={(e, val) => {
+                                        val.name = "county"
+                                        handleSelectAutoComplete(e, val)
+                                        searchTownByCounty(val.value)
                                     }}
-                                    label="Town"
+                                    label="County"
                                     renderInput={(params) => <TextField {...params}  />}
                                 />
                             </Col>
@@ -331,9 +377,11 @@ function OrderSearchPage(props) {
                             <Col sm={10}>
                                 <Autocomplete
                                     disablePortal
+                                    disabled={inputs.county === null}
                                     id="town-select"
                                     name="town"
-                                    options={constantTown}
+                                    value={inputs.town.value}
+                                    options={towns}
                                     onChange={(e, value) => {
                                         value.name = "town"
                                         handleSelectAutoComplete(e, value)
@@ -361,6 +409,28 @@ function OrderSearchPage(props) {
                                     </Select>
                                 </FormControl>
                             </Col>
+
+                            <Label for="cancel_reason" sm={2} style={inputLabelStyle}>Cancel Reason</Label>
+                            <Col sm={10}>
+                                <FormControl fullWidth>
+                                    <InputLabel id="cancel_reason">Cancel Reason</InputLabel>
+                                    <Select
+                                        disabled={inputs.cancelled !== 1}
+                                        name="cancelReason"
+                                        labelId="cancel_reason"
+                                        id="canceled_reason"
+                                        value={inputs.cancelReason}
+                                        label="cancelReason"
+                                        onChange={handleInputChange}
+                                    >
+                                        {
+                                            CancelReason.map(reason => {
+                                                return (<MenuItem value={reason} key={reason}>{reason}</MenuItem>)
+                                            })
+                                        }
+                                    </Select>
+                                </FormControl>
+                            </Col>
                         </div>
                     </div>
                 </FormGroup>
@@ -384,14 +454,14 @@ function OrderSearchPage(props) {
                 <tbody>
                 {orders?.map((orderData) => {
                     return (
-                        <tr key={orderData.rgId + orderData.customerId}>
+                        <tr key={orderData.rgId + '-' + orderData.rmId + '-' + orderData.rsId + '-' + Math.random()}>
                             <td><Link to={"/orders/" + orderData.rgId + "/detail"}>{orderData.rgId}</Link>
                             </td>
-                            <td>{orderData.orderTime}</td>
+                            <td>{orderData.orderTime && new Date(orderData.orderTime).toLocaleString()}</td>
                             <td>{orderData.product && orderData.product.productName}</td>
                             <td>{orderData.customerId}</td>
                             <td>{orderData.product && orderData.product.supplier && orderData.product.supplier.supplierName}</td>
-                            <td>{orderData.cancelOrder.cancelReason && orderData.cancelOrder.cancelReason.length > 0 ? 'Cancelled' : 'Not Cancelled'}</td>
+                            <td>{orderData.cancelOrder && orderData.cancelOrder.cancelReason && orderData.cancelOrder.cancelReason.length > 0 ? 'Cancelled - ' + orderData.cancelOrder.cancelReason : 'Not Cancelled'}</td>
                         </tr>
                     )
                 })}
@@ -410,10 +480,6 @@ function OrderSearchPage(props) {
             </div>
             <div>
                 Page: {state.page} of {state.pages}
-            </div>
-            <div>
-
-                <div>Test state: {JSON.stringify(state)}</div>
             </div>
         </div>
     );
