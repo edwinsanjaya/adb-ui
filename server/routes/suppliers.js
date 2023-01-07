@@ -33,7 +33,7 @@ router.post('/suppliers/filter', async (req, res) => {
                 supplierId: nameFilter
             })
         }
-        filter.push({
+        queryOrNameFilter.push({
             supplierName: {
                 [Op.like]: `%${nameFilter}%`
             }
