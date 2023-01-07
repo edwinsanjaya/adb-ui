@@ -21,6 +21,8 @@ router.post('/orders/filter', async (req, res) => {
     const townFilter = body.town;
     const cancelledFilter = body.cancelled;
     const cancelReasonFilter = body.cancelReason;
+    const sortedBy = body.sortedBy;
+    const sortDirection = body.sortDirection;
 
     const orderFilters = [];
     if (rgIdFilter) {
@@ -101,6 +103,12 @@ router.post('/orders/filter', async (req, res) => {
         })
     }
 
+    const orderBy = [];
+    if (sortedBy && sortDirection) {
+        orderBy.push(sortedBy)
+        orderBy.push(sortDirection)
+    }
+
     let queryOptions = {
         include: [{
             model: Product,
@@ -123,10 +131,15 @@ router.post('/orders/filter', async (req, res) => {
         limit: size,
         offset: page * size
     };
+    if (orderBy.length > 0) {
+        queryOptions.order = [orderBy]
+    }
+
     const orders = await Order.findAll(queryOptions)
 
     delete queryOptions.limit;
     delete queryOptions.offset;
+    delete queryOptions.order;
     const totalItems = await Order.count(queryOptions)
     const response = {
         content: orders,

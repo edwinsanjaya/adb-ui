@@ -7,6 +7,37 @@ const products = require("./routes/products")
 const suppliers = require("./routes/suppliers")
 const orders = require("./routes/orders")
 
+const Product = require("./models/Product")
+const Supplier = require("./models/Supplier")
+const CancelOrder = require("./models/CancelOrder");
+const Order = require("./models/Order")
+
+Supplier.hasMany(Product, {
+  foreignKey: 'supplierId'
+})
+
+Product.belongsTo(Supplier, {
+  foreignKey: 'supplierId',
+  targetKey: 'supplierId',
+  as: 'supplier'
+})
+
+Order.belongsTo(Product, {
+  foreignKey: 'productId',
+  targetKey: 'productId',
+  as: 'product'
+});
+
+CancelOrder.belongsTo(Order, {
+  foreignKey: 'rgId',
+  targetKey: 'rgId'
+})
+
+Order.hasOne(CancelOrder, {
+  foreignKey: 'rgId',
+  as: 'cancelOrder'
+})
+
 // Middleware
 app.use(cors());
 app.use(express.json())
