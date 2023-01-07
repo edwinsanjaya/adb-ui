@@ -8,6 +8,12 @@ host = "adb-database.ctr0cejwu8ze.ap-northeast-1.rds.amazonaws.com"
 port = 5432
 database = "adb_database"
 
+// user = "postgres"
+// password = "admin"
+// host = "localhost"
+// port = 5432
+// database = "adb_final"
+
 const pool = new Pool({
   user: user,
   password: password,
