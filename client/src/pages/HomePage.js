@@ -41,21 +41,11 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
-const rows = [
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-];
-
 function HomePage(props) {
 
   const [dashboard1, setDashboard1] = useState([])
   const [dashboard2, setDashboard2] = useState([])
+  const [dashboard3, setDashboard3] = useState([])
 
   const getDashboard1 = async () => {
     const url = 'http://localhost:5000/dashboard/top-ten-supplier-by-product'
@@ -69,10 +59,17 @@ function HomePage(props) {
     setDashboard2(response.data)
   }
 
+  const getDashboard3 = async () => {
+    const url = 'http://localhost:5000/dashboard/top-ten-county-by-supplier'
+    const response = await axios.get(url);
+    setDashboard3(response.data)
+  }
+
 
   useEffect(() => {
     getDashboard1()
     getDashboard2()
+    getDashboard3()
   }, [])
 
   return (
@@ -81,7 +78,7 @@ function HomePage(props) {
         <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
           <Grid item xs={6}>
             <Item>
-              <h4>Top 10 Seller by Products</h4>
+              <h4>Top 10 Suppliers by Products</h4>
               {dashboard1.length !== 0 &&
                 <TableContainer component={Paper}>
                   <Table sx={{ minWidth: 700 }} aria-label="customized table">
@@ -89,7 +86,7 @@ function HomePage(props) {
                       <TableRow>
                         {Object.keys(dashboard1[0]).map(function (key) {
                           return (
-                            <StyledTableCell align="right">{key}</StyledTableCell>
+                            <StyledTableCell align="left">{key}</StyledTableCell>
                           )
                         })}
                       </TableRow>
@@ -99,7 +96,7 @@ function HomePage(props) {
                         <StyledTableRow key={index}>
                           {Object.keys(result).map(function (key) {
                             return (
-                              <StyledTableCell align="right">{result[key]}</StyledTableCell>
+                              <StyledTableCell align="left">{result[key]}</StyledTableCell>
                             )
                           })}
                         </StyledTableRow>
@@ -114,8 +111,8 @@ function HomePage(props) {
 
 
           <Grid item xs={6}>
-          <Item>
-              <h4>Top 10 Seller by Orders</h4>
+            <Item>
+              <h4>Top 10 Suppliers by Orders</h4>
               {dashboard2.length !== 0 &&
                 <TableContainer component={Paper}>
                   <Table sx={{ minWidth: 700 }} aria-label="customized table">
@@ -123,7 +120,7 @@ function HomePage(props) {
                       <TableRow>
                         {Object.keys(dashboard2[0]).map(function (key) {
                           return (
-                            <StyledTableCell align="right">{key}</StyledTableCell>
+                            <StyledTableCell align="left">{key}</StyledTableCell>
                           )
                         })}
                       </TableRow>
@@ -133,7 +130,7 @@ function HomePage(props) {
                         <StyledTableRow key={index}>
                           {Object.keys(result).map(function (key) {
                             return (
-                              <StyledTableCell align="right">{result[key]}</StyledTableCell>
+                              <StyledTableCell align="left">{result[key]}</StyledTableCell>
                             )
                           })}
                         </StyledTableRow>
@@ -147,7 +144,35 @@ function HomePage(props) {
 
 
           <Grid item xs={6}>
-            <Item>3</Item>
+            <Item>
+              <h4>Top 10 Counties by Suppliers</h4>
+              {dashboard3.length !== 0 &&
+                <TableContainer component={Paper}>
+                  <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                    <TableHead>
+                      <TableRow>
+                        {Object.keys(dashboard3[0]).map(function (key) {
+                          return (
+                            <StyledTableCell align="left">{key}</StyledTableCell>
+                          )
+                        })}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {dashboard3.map((result, index) => (
+                        <StyledTableRow key={index}>
+                          {Object.keys(result).map(function (key) {
+                            return (
+                              <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                            )
+                          })}
+                        </StyledTableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              }
+            </Item>
           </Grid>
 
 
