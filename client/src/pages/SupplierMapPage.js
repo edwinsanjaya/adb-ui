@@ -8,7 +8,11 @@ import dayjs from 'dayjs';
 import {
   Stack,
   TextField,
-  Button
+  Button,
+  InputLabel,
+  MenuItem,
+  FormControl,
+  Select
 } from '@mui/material/';
 
 import {
@@ -32,6 +36,10 @@ function SupplierMapPage(props) {
   const [suppliers, setSuppliers] = useState([])
   const [startTime, setStartTime] = useState(dayjs('2010-01-01T00:00:01'))
   const [endTime, setEndTime] = useState(dayjs('2011-01-01T00:00:01'))
+  const [inputs, setInputs] = useState({
+    county: "",
+    town: ""
+  })
 
   const dummy = [
     {
@@ -73,9 +81,20 @@ function SupplierMapPage(props) {
     });
   }, [suppliers]);
 
+  function handleInputChange(event) {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value
+    const name = target.name
+
+    setInputs({
+      ...inputs,
+      [name]: value
+    });
+  }
+
   return (
     <div>
-      <div>{JSON.stringify(startTime)} {JSON.stringify(endTime)}</div>
+      <div>{JSON.stringify(startTime)} {JSON.stringify(endTime)} {JSON.stringify(inputs)}</div>
       <div className="search-container">
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Stack spacing={3}>
@@ -101,6 +120,24 @@ function SupplierMapPage(props) {
             />
           </Stack>
         </LocalizationProvider>
+        <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+          <InputLabel id="county">Age</InputLabel>
+          <Select
+            name="county"
+            labelId="county"
+            id="county"
+            value={inputs.county}
+            onChange={handleInputChange}
+            label="County"
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            <MenuItem value={10}>Ten</MenuItem>
+            <MenuItem value={20}>Twenty</MenuItem>
+            <MenuItem value={30}>Thirty</MenuItem>
+          </Select>
+        </FormControl>
         <Button variant="contained">Search</Button>
       </div>
       <div ref={mapContainer} className="map-container" />
