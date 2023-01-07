@@ -48,71 +48,75 @@ router.get("/products/search", async (req, res) => {
     }
 })
 
-router.post("/products/filter", async (req, res) => {
-    const body = req.body;
-    const page = req.query.page;
-    const size = req.query.size;
+router.post("/products/filter", async (req, res, next) => {
+    try {
+        const body = req.body;
+        const page = req.query.page;
+        const size = req.query.size;
 
-    const keywordFilter = body.keyword;
-    const queryKeywords = [];
-    const productQueryFilters = [];
-    if (keywordFilter?.length > 0) {
-        const queryOrKeywords = [];
-        if (!isNaN(keywordFilter)) {
+        const keywordFilter = body.keyword;
+        const queryKeywords = [];
+        const productQueryFilters = [];
+        if (keywordFilter?.length > 0) {
+            const queryOrKeywords = [];
+            if (!isNaN(keywordFilter)) {
+                queryOrKeywords.push({
+                    productId: keywordFilter
+                }, {
+                    eanBarcode: keywordFilter
+                })
+            }
             queryOrKeywords.push({
-                productId: keywordFilter
-            }, {
-                eanBarcode: keywordFilter
+                productName: {
+                    [Op.like]: `%${keywordFilter}%`
+                }
+            })
+            queryKeywords.push({
+                [Op.or]: [...queryOrKeywords]
+            })
+            productQueryFilters.push(queryKeywords)
+        }
+        const categoryFilter = body.category;
+        if (!isNaN(categoryFilter)) {
+            productQueryFilters.push({
+                category: categoryFilter
             })
         }
-        queryOrKeywords.push({
-            productName: {
-                [Op.like]: `%${keywordFilter}%`
-            }
-        })
-        queryKeywords.push({
-            [Op.or]: [...queryOrKeywords]
-        })
-        productQueryFilters.push(queryKeywords)
-    }
-    const categoryFilter = body.category;
-    if (!isNaN(categoryFilter)) {
-        productQueryFilters.push({
-            category: categoryFilter
-        })
-    }
 
-    const warehouseCompanyFilter = body.warehouseCompany;
-    if (warehouseCompanyFilter?.length > 0) {
-        productQueryFilters.push({
-            warehouseCompany: warehouseCompanyFilter
-        })
-    }
-
-    const sortedBy = body.sortedBy;
-    const sortDirection = body.sortDirection;
-    const orders = [];
-    if (sortedBy && sortDirection) {
-        orders.push([sortedBy, sortDirection])
-    }
-    const queryOptions = {
-        where: Sequelize.and(...productQueryFilters),
-        limit: size,
-        offset: page * size,
-        order: orders
-    }
-    const products = await Product.findAll(queryOptions);
-    delete queryOptions.limit;
-    delete queryOptions.offset;
-    delete queryOptions.order;
-    const totalItems = await Product.count(queryOptions);
-    const response = {
-        content: products,
-        metadata: {
-            page, size, totalItems
+        const warehouseCompanyFilter = body.warehouseCompany;
+        if (warehouseCompanyFilter?.length > 0) {
+            productQueryFilters.push({
+                warehouseCompany: warehouseCompanyFilter
+            })
         }
+
+        const sortedBy = body.sortedBy;
+        const sortDirection = body.sortDirection;
+        const orders = [];
+        if (sortedBy && sortDirection) {
+            orders.push([sortedBy, sortDirection])
+        }
+        const queryOptions = {
+            where: Sequelize.and(...productQueryFilters),
+            limit: size,
+            offset: page * size,
+            order: orders
+        }
+        const products = await Product.findAll(queryOptions);
+        delete queryOptions.limit;
+        delete queryOptions.offset;
+        delete queryOptions.order;
+        const totalItems = await Product.count(queryOptions);
+        const response = {
+            content: products,
+            metadata: {
+                page, size, totalItems
+            }
+        }
+        res.send(response)
+    } catch (e) {
+        return next(e)
     }
-    res.send(response)
 })
 
 module.exports = router;
