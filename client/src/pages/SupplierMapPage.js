@@ -65,7 +65,7 @@ function SupplierMapPage(props) {
   const [zoom, setZoom] = useState(7);
 
   const getCounties = async () => {
-    const url = 'http://localhost:5000/region/county'
+    const url = 'http://localhost:5000/regions/county'
     const response = await axios.get(url);
     setCounties(response.data)
   }
