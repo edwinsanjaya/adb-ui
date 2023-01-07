@@ -11,6 +11,7 @@ import ProductListPage from './pages/ProductListPage';
 import ProductSearchPage from './pages/ProductSearchPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import SupplierSearchPage from './pages/SupplierSearchPage';
+import SupplierDetailPage from './pages/SupplierDetailPage';
 import QueryPage from './pages/QueryPage';
 import TestMapPage from './pages/TestMapPage';
 import MapBoxPage from './pages/MapBoxPage';
@@ -28,6 +29,7 @@ function App() {
             <Route exact path="/products/search" element={<ProductSearchPage/>}/>
             <Route exact path="/product/:product_id/detail" element={<ProductDetailPage/>}/>
             <Route exact path="/suppliers/search" element={<SupplierSearchPage/>}/>
+            <Route exact path="/supplier/:supplier_id/detail" element={<SupplierDetailPage/>}/>
             <Route exact path="/tools/query" element={<QueryPage/>}></Route>
             <Route exact path="/map/box" element={<MapBoxPage/>}/>
             <Route exact path="/map/test" element={<TestMapPage/>}/>

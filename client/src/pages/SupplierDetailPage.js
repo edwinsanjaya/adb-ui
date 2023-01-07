@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { Table } from 'reactstrap'
+import axios from 'axios'
 
 function SupplierDetailPage(props) {
 
@@ -11,59 +12,52 @@ function SupplierDetailPage(props) {
   const [orders, setOrders] = useState([]);
 
   const getSupplier = async () => {
-    try {
-      const response = await (await fetch('http://localhost:5000/supplier/' + params.supplier_id));
-      const jsonResponse = await response.json();
-      setSupplier(jsonResponse[0])
-    } catch (error) {
-      console.error(error.message);
-    }
+    const url = 'http://localhost:5000/supplier/' + params.supplier_id
+    const response = await axios.get(url);
+    setSupplier(response.data[0])
   }
 
   const getProducts = async () => {
-    try {
-      const response = await (await fetch('http://localhost:5000/products/supplier_id/' + params.supplier_id))
-      const jsonResponse = await response.json();
-      setProducts(jsonResponse)
-    } catch (error) {
-      console.error(error.message)
-    }
+    const url = 'http://localhost:5000/products/supplier_id/' + params.supplier_id
+    const response = await axios.get(url);
+    setProducts(response.data)
   }
 
   useEffect(() => {
-    getProduct();
-    getSuppliers()
+    getProducts();
+    getSupplier()
   }, [])
 
   return (
     <div>
-      <div><h3>{product.product_name}</h3></div>
+      {/* {JSON.stringify(supplier)} */}
+      <div><h3>{supplier.supplier_name}</h3></div>
       <Table>
         <tbody>
-          {Object.keys(product).map(function (key) {
+          {Object.keys(supplier).map(function (key) {
             return (
               <tr key={key}>
                 <th scope="col">{key}</th>
-                <td>{product[key]}</td>
+                <td>{supplier[key]}</td>
               </tr>
             )
           })}
         </tbody>
       </Table>
-      <div><h3>Supplier Owns this Product</h3></div>
+      <div><h3>Products from Supplier</h3></div>
       <Table>
         <tbody>
           <tr>
-            <th scope="row">Supplier ID</th>
-            <th scope="row">Supplier Name</th>
-            <th scope="row">Total Products</th>
+            <th scope="row">Product ID</th>
+            <th scope="row">Product Name</th>
+            <th scope="row">Category</th>
           </tr>
-          {suppliers.map(function (supplier, index) {
+          {products.map(function (product, index) {
             return (
               <tr key={index}>
-                <td>{supplier.supplier_id}</td>
-                <td>{supplier.supplier_name}</td>
-                <td>{supplier.total_products}</td>
+                <td>{product.product_id}</td>
+                <td><Link to={"/product/" + product.product_id + "/detail"}>{product.product_name}</Link></td>
+                <td>{product.category}</td>
               </tr>
             )
           })}
