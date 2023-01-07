@@ -147,7 +147,7 @@ router.post('/orders/filter', async (req, res, next) => {
         queryOptions.include.push({
             model: CancelOrder,
             as: 'cancelOrder',
-            required: cancelOrderFilter.length > 0,
+            required: false,
             where: Sequelize.and(...cancelOrderFilter)
         })
         if (orderBy.length > 0) {
