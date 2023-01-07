@@ -46,7 +46,7 @@ CancelOrder.belongsTo(Order, {
 
 // Middleware
 app.use(cors());
-app.use(express.json())
+app.use(express.json());
 
 // Sequelize
 sequelize.authenticate()
@@ -87,6 +87,11 @@ app.get("/product/:product_id", async (req, res) => {
     console.error(err.message)
   }
 })
+
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.status(500).send(err.message);
+});
 
 app.listen(5000, () => {
   console.log("server has started on port 5000")
