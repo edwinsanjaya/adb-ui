@@ -73,7 +73,7 @@ function OrderSearchPage(props) {
     const [state, setState] = useState({
         totalItems: 0,
         page: 1,
-        size: 1,
+        size: 50,
         rng: "",
     })
 
@@ -102,7 +102,6 @@ function OrderSearchPage(props) {
     async function searchOrders() {
         const url = 'http://localhost:5000/orders/filter'
 
-        const period = new Date(search.orderPeriod).valueOf()
         let cancelled = null
         switch (search.cancelled) {
             case 1:
@@ -128,9 +127,6 @@ function OrderSearchPage(props) {
             // cancelReason: search.cancelReason
         }
 
-        console.log(data)
-
-        const data2 = {}
         const config = {
             headers: {
                 'Content-Type': 'application/json',
@@ -141,7 +137,7 @@ function OrderSearchPage(props) {
             }
         }
 
-        const response = await axios.post(url, data2, config);
+        const response = await axios.post(url, data, config);
         setOrders(response.data.content)
         setState({
             ...state,
@@ -388,14 +384,14 @@ function OrderSearchPage(props) {
                 <tbody>
                 {orders?.map((orderData) => {
                     return (
-                        <tr key={orderData.rgId}>
+                        <tr key={orderData.rgId + orderData.customerId}>
                             <td><Link to={"/orders/" + orderData.rgId + "/detail"}>{orderData.rgId}</Link>
                             </td>
                             <td>{orderData.orderTime}</td>
-                            <td>{orderData.product.productName}</td>
+                            <td>{orderData.product && orderData.product.productName}</td>
                             <td>{orderData.customerId}</td>
-                            <td>{orderData.product.supplier.supplierName}</td>
-                            <td>{orderData.cancelOrder.length === 0 ? 'Not Cancelled' : 'Cancelled'}</td>
+                            <td>{orderData.product && orderData.product.supplier && orderData.product.supplier.supplierName}</td>
+                            <td>{orderData.cancelOrder.cancelReason && orderData.cancelOrder.cancelReason.length > 0 ? 'Cancelled' : 'Not Cancelled'}</td>
                         </tr>
                     )
                 })}
