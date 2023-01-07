@@ -42,7 +42,7 @@ router.post("/suppliers/filter/region-order-period", async (req, res, next) => {
                                                       AND o.order_time <= '${endPeriod}' `
         let additionalQuery = ''
         if (town?.length > 0) {
-            additionalQuery += `AND ST_Within(s.supplier_geom, (SELECT geom FROM taiwan_town WHERE towneng = '${town}' LIMIT 1))`
+            additionalQuery += `AND ST_Within(s.supplier_geom, (SELECT geom FROM taiwan_town WHERE towneng = '${town}' AND countyid = (SELECT countyid FROM taiwan_county WHERE countyeng = '${county}') LIMIT 1))`
         } else if (county?.length > 0) {
             additionalQuery += `AND ST_Within(s.supplier_geom, (SELECT geom FROM taiwan_county WHERE countyeng = '${county}' LIMIT 1))`
         }
@@ -62,14 +62,13 @@ router.post('/suppliers/filter', async (req, res, next) => {
         const body = req.body;
         const filter = []
         const taiwanCountryFilter = body.taiwanCountry;
-        if (taiwanCountryFilter) {
+        const taiwanTownFilter = body.taiwanTown;
+        if (taiwanTownFilter && taiwanCountryFilter) {
+            filter.push(Sequelize.where(Sequelize.fn(`ST_Within`, Sequelize.col('supplier_geom'),
+                Sequelize.literal(`(SELECT geom FROM taiwan_town WHERE towneng = '${taiwanTownFilter}' AND countyid = (SELECT countyid FROM taiwan_county WHERE countyeng = '${taiwanCountryFilter}'))`)), true))
+        } else if (taiwanCountryFilter) {
             filter.push(Sequelize.where(Sequelize.fn(`ST_Within`, Sequelize.col('supplier_geom'),
                 Sequelize.literal(`(SELECT geom FROM taiwan_county WHERE countyeng = '${taiwanCountryFilter}')`)), true))
-        }
-        const taiwanTownFilter = body.taiwanTown;
-        if (taiwanTownFilter) {
-            filter.push(Sequelize.where(Sequelize.fn(`ST_Within`, Sequelize.col('supplier_geom'),
-                Sequelize.literal(`(SELECT geom FROM taiwan_town WHERE towneng = '${taiwanTownFilter}')`)), true))
         }
         const nameFilter = body.name;
         if (nameFilter) {

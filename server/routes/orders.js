@@ -62,15 +62,14 @@ router.post('/orders/filter', async (req, res, next) => {
             })
         }
 
-        if (countyFilter) {
+        if (townFilter) {
+            orderFilters.push(Sequelize.where(Sequelize.fn(`ST_Within`, Sequelize.col('shipping_geom'),
+                Sequelize.literal(`(SELECT geom FROM taiwan_town WHERE towneng = '${townFilter}' AND countyid = (SELECT countyid FROM taiwan_county WHERE countyeng = '${countyFilter}'))`)), true))
+        } else if (countyFilter) {
             orderFilters.push(Sequelize.where(Sequelize.fn(`ST_Within`, Sequelize.col('shipping_geom'),
                 Sequelize.literal(`(SELECT geom FROM taiwan_county WHERE countyeng = '${countyFilter}')`)), true))
         }
 
-        if (townFilter) {
-            orderFilters.push(Sequelize.where(Sequelize.fn(`ST_Within`, Sequelize.col('shipping_geom'),
-                Sequelize.literal(`(SELECT geom FROM taiwan_town WHERE towneng = '${countyFilter}')`)), true))
-        }
 
         const productFilters = [];
         if (productFilter) {
