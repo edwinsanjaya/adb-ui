@@ -23,7 +23,7 @@ function SupplierDetailPage(props) {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [value, setValue] = useState("supplier");
-  
+
 
   const getSupplier = async () => {
     const url = 'http://localhost:5000/supplier/' + params.supplier_id
@@ -37,23 +37,48 @@ function SupplierDetailPage(props) {
     setProducts(response.data)
   }
 
-  function supplierToDataset(){
+  const getOrders = async () => {
+    const url = 'http://localhost:5000/orders/supplier_id/' + params.supplier_id
+    const response = await axios.get(url);
+    setOrders(response.data)
+  }
+
+  function supplierToDataset() {
     let supplierHeading = '<h4>' + supplier.supplier_name + '</h4>'
     let supplierDetail = supplier.supplier_address + '<br>' + 'Zip Code:' + supplier.supplier_zipcode + '<br>'
-    console.log(supplier)
-    console.log(supplier.supplier_longitude)
     let temp = {
       'coordinates': new mapboxgl.LngLat(parseFloat(supplier.supplier_longitude), parseFloat(supplier.supplier_latitude)),
-      'popupHTML': supplierHeading + supplierDetail
-    }  
+      'popupHTML': supplierHeading + supplierDetail,
+      'className': 'big-marker'
+    }
     return [temp]
   }
 
-  const dataset = supplier.length == 0 ? [{}] : supplierToDataset()
+  function orderToDataset() {
+    let temps = []
+    orders.forEach(function (order) {
+      let orderHeading = 'Order RG ID:<h4>' + order.rg_id + '</h4><h5>' + order.order_time + '</h5>'
+      let orderAddress = 'Order Address:<br>' + order.shipping_address
+      console.log(new mapboxgl.LngLat(parseFloat(order.longitude), parseFloat(order.latitude)))
+      let temp = {
+        'coordinates': new mapboxgl.LngLat(parseFloat(order.longitude), parseFloat(order.latitude)),
+        'popupHTML': orderHeading + orderAddress,
+        'color': "#FF5733",
+      }
+      temps.push(temp)
+    })
+    return temps
+  }
+
+  const supplierSet = supplier.length == 0 ? [{}] : supplierToDataset()
+  const orderSet = orders.length == 0 ? [{}] : orderToDataset()
+  const dataset = supplierSet.concat(orderSet)
+  // const dataset = supplierSet
 
   useEffect(() => {
     getProducts();
     getSupplier();
+    getOrders();
   }, [])
 
 
@@ -110,7 +135,7 @@ function SupplierDetailPage(props) {
   }
 
   function supplierMap() {
-    return(
+    return (
       <div>
         <Mapbox
           dataset={dataset}
