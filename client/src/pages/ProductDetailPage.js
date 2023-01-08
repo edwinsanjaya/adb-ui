@@ -102,12 +102,10 @@ function ProductDetailPage(props) {
             <TabList onChange={handleTabChange} aria-label="lab API tabs example">
               <Tab label="Product Details" value="product" />
               <Tab label="Supplier List" value="supplier" />
-              <Tab label="View in Map" value="map" />
             </TabList>
           </Box>
           <TabPanel value="product">{productDetail()}</TabPanel>
           <TabPanel value="supplier">{supplierList()}</TabPanel>
-          <TabPanel value="map">Item Three</TabPanel>
         </TabContext>
       </Box>
     </div>
