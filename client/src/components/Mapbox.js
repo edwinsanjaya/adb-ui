@@ -2,12 +2,13 @@ import React, { useRef, useEffect, useState } from 'react';
 import mapboxgl, { LngLat } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './Mapbox.scss'
+import { ReactComponent as CartIcon } from '../assets/icon/cart.svg'
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiZWR3aW5zYW5qYXlhIiwiYSI6ImNsY2pnODFnNzBpanYzdm10eDVhbnVnN2kifQ.IQwREZ9VVrx7vTe8s57i3Q';
 
 var markers = []
 
-function Mapbox({dataset=[]}) {
+function Mapbox({ dataset = [] }) {
 
   // map
   const mapContainer = useRef(null);
@@ -16,6 +17,14 @@ function Mapbox({dataset=[]}) {
   const [lng, setLng] = useState(120.9605);
   const [lat, setLat] = useState(23.6978);
   const [zoom, setZoom] = useState(7);
+
+  const Cart = () => {
+    return (
+      <div>
+        <CartIcon />
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -43,18 +52,47 @@ function Mapbox({dataset=[]}) {
     markers = [];
   }
 
-  //require: data.popupHTML, data.coordinates
+  //require: data.popupHTML, data.coordinates, data.color, data.scale
   function addMarkers() {
     dataset.forEach((data) => {
-      console.log(data)
-      var popupHTML = data.popupHTML
+      if (Object.keys(data).length === 0) return;
+
+      var color = data.color ? data.color : "#3FB1CE"
+      var scale = data.scale ? data.scale : 0.75
+      var popupHTML = data.popupHTML ? data.popupHTML : ""
       var popup = new mapboxgl.Popup({ offset: 30 })
         .setHTML(popupHTML)
-      var marker = new mapboxgl.Marker({ scale: 0.75 })
-        .setLngLat(data.coordinates)
-        .setPopup(popup)
-        .addTo(map.current)
-      markers.push(marker)
+
+      if (data.className) {
+        const el = document.createElement('div');
+        el.className = data.className
+        var marker = new mapboxgl.Marker(el, { scale: scale, color: color })
+          .setLngLat(data.coordinates)
+          .setPopup(popup)
+          .addTo(map.current)
+        markers.push(marker)
+      }
+      else {
+        var marker = new mapboxgl.Marker({ scale: scale, color: color })
+          .setLngLat(data.coordinates)
+          .setPopup(popup)
+          .addTo(map.current)
+        markers.push(marker)
+      }
+
+
+
+
+      // var color = data.color ? data.color : "#3FB1CE"
+      // var scale = data.scale ? data.scale : 0.75
+      // var popupHTML = data.popupHTML
+      // var popup = new mapboxgl.Popup({ offset: 30 })
+      //   .setHTML(popupHTML)
+      // var marker = new mapboxgl.Marker(el, { scale: scale , color: color})
+      //   .setLngLat(data.coordinates)
+      //   .setPopup(popup)
+      //   .addTo(map.current)
+      // markers.push(marker)
     });
   }
 
