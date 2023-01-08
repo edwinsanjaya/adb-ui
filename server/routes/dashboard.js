@@ -120,7 +120,7 @@ router.get('/dashboard/top-ten-products-highest-returns', async (req, res) => {
 // Supplier - Filter products by created_at period 
 router.post("/dashboard/filter/top-ten-suppliers-by-products", async (req, res, next) => {
   try {
-      if(req.body.startPeriod == 1293840060000 & req.body.endPeriod == 1309345740000)
+      if(req.body.startPeriod == 1325376000000 & req.body.endPeriod == 1346457600000)
       {
         const query = await pool.query("SELECT supplier_id,(SELECT supplier_name FROM suppliers WHERE products.supplier_id = suppliers.supplier_id), count(*) total_products FROM products WHERE supplier_id in (SELECT DISTINCT supplier_id FROM suppliers) GROUP BY supplier_id ORDER BY total_products DESC LIMIT 10;")
         res.send(query.rows)
@@ -138,7 +138,7 @@ router.post("/dashboard/filter/top-ten-suppliers-by-products", async (req, res, 
         count(*) total_products
       FROM products
       WHERE supplier_id in (SELECT DISTINCT supplier_id FROM suppliers)
-        AND created_at >= '2011-01-01' AND created_at <= '2011-06-21'
+        AND created_at >= '${startPeriod}' AND created_at <= '${endPeriod}'
       GROUP BY supplier_id
       ORDER BY total_products DESC
       LIMIT 10
@@ -147,7 +147,7 @@ router.post("/dashboard/filter/top-ten-suppliers-by-products", async (req, res, 
       }
     } catch (error) {
       console.log(error);
-      res.status(500).json({ error: true, message: 'Internal Server Error' })
+      res.status(500).send({ error: true, message: 'Internal Server Error' })
     }
 })
 
@@ -181,9 +181,98 @@ router.post("/dashboard/filter/top-ten-suppliers-by-orders", async (req, res, ne
       }
     } catch (error) {
       console.log(error);
-      res.status(500).json({ error: true, message: 'Internal Server Error' })
+      res.status(500).send({ error: true, message: 'Internal Server Error' })
     }
 })
 
+// Products - Filter products with the highest orders by order period
+router.post("/dashboard/filter/top-ten-products-with-highest-orders", async (req, res, next) => {
+  try {
+      if(req.body.startPeriod == 1293840060000 & req.body.endPeriod == 1309345740000)
+      {
+        const query = await pool.query(`
+        SELECT p.product_id, p.product_name, COUNT(*) AS orders
+        FROM orders o
+        JOIN products p on o.product_id = p.product_id
+        GROUP BY p.product_id, p.product_name
+        ORDER BY 3 DESC
+        LIMIT 10;
+        `);
+        res.send(query.rows)
+      }
+      else 
+      {
+        const startPeriod = new Date(req.body.startPeriod).toISOString()
+        const endPeriod = new Date(req.body.endPeriod).toISOString()
+  
+        console.log("Query products by orders, " , startPeriod , " " , endPeriod)
+  
+      let query = await pool.query(`
+        SELECT p.product_id, p.product_name, COUNT(*) AS orders
+        FROM orders o
+        JOIN products p on o.product_id = p.product_id
+        WHERE order_time >= '${startPeriod}' AND order_time <= '${endPeriod}'
+        GROUP BY p.product_id, p.product_name
+        ORDER BY 3 DESC
+        LIMIT 10;
+        `)
+      res.send(query.rows)
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({ error: true, message: 'Internal Server Error' })
+    }
+})
+
+// Products - Filter products with the highest returns by return date
+router.post("/dashboard/filter/top-ten-products-with-highest-returns", async (req, res, next) => {
+  try {
+      if(req.body.startPeriod == 1293840060000 & req.body.endPeriod == 1309345740000)
+      {
+        const query = await pool.query(`
+        SELECT T2.product_id, T2.product_name, T1.returns
+        FROM
+          (SELECT o.product_id, COUNT(*) AS returns
+          FROM products_return pr
+          JOIN orders o on pr.rg_id = o.rg_id
+          GROUP BY o.product_id) AS T1
+        JOIN
+          (SELECT p.product_id, p.product_name
+          FROM products p) AS T2
+          ON T1.product_id = T2.product_id
+        ORDER BY returns DESC
+        LIMIT 10;
+        `);
+        res.send(query.rows)
+      }
+      else 
+      {
+        const startPeriod = new Date(req.body.startPeriod).toISOString()
+        const endPeriod = new Date(req.body.endPeriod).toISOString()
+  
+        console.log("Query products by returns, " , startPeriod , " " , endPeriod)
+  
+      let query = await pool.query(`
+        SELECT T2.product_id, T2.product_name, T1.returns
+        FROM
+          (SELECT o.product_id, COUNT(*) AS returns
+          FROM products_return pr
+          JOIN orders o on pr.rg_id = o.rg_id
+          GROUP BY o.product_id) AS T1
+        JOIN
+          (SELECT p.product_id, p.product_name
+          FROM products p) AS T2
+          ON T1.product_id = T2.product_id
+        WHERE return_complete_time >= '${startPeriod}' AND return_complete_time <= '${endPeriod}'
+        ORDER BY returns DESC
+        LIMIT 10;
+        `)
+      res.send(query.rows)
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({ error: true, message: 'Internal Server Error' })
+    }
+})
 
 module.exports = router;
