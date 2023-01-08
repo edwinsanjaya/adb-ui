@@ -52,4 +52,34 @@ router.get('/dashboard/top-ten-town-by-supplier', async (req, res) => {
   }
 })
 
+router.get('/dashboard/top-five-cancel-order-reason', async (req, res) => {
+  try {
+    const reasons = await pool.query(`SELECT COUNT(*) total_order, cancel_reason
+      FROM cancel_order
+      GROUP BY cancel_reason
+      ORDER BY total_order DESC
+      LIMIT 5`)
+    res.json(reasons.rows)
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true, message: 'Internal Server Error' })
+  }
+})
+
+
+router.get('/dashboard/top-five-return-order-reason', async (req, res) => {
+  try {
+    const reasons = await pool.query(`SELECT COUNT(*) total_order, return_reason
+      FROM products_return
+      GROUP BY return_reason
+      ORDER BY total_order DESC
+      LIMIT 5`)
+    res.json(reasons.rows)
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true, message: 'Internal Server Error' })
+  }
+})
+
+
 module.exports = router;

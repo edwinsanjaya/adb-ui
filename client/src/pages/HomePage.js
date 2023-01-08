@@ -51,6 +51,9 @@ function HomePage(props) {
   const [dashboard3, setDashboard3] = useState([])
   const [dashboard4, setDashboard4] = useState([])
 
+  const [topCancelReasons, setTopCancelReasons] = useState([])
+  const [topReturnReasons, setTopReturnReasons] = useState([])
+
   const getDashboard1 = async () => {
     const url = 'http://localhost:5000/dashboard/top-ten-supplier-by-product'
     const response = await axios.get(url);
@@ -75,12 +78,26 @@ function HomePage(props) {
     setDashboard4(response.data)
   }
 
+  const getTopCancelReasons = async () => {
+    const url = 'http://localhost:5000/dashboard/top-five-cancel-order-reason'
+    const response = await axios.get(url);
+    setTopCancelReasons(response.data)
+  }
+
+  const getTopReturnReasons = async () => {
+    const url = 'http://localhost:5000/dashboard/top-five-return-order-reason'
+    const response = await axios.get(url);
+    setTopReturnReasons(response.data)
+  }
+
 
   useEffect(() => {
     getDashboard1()
     getDashboard2()
     getDashboard3()
     getDashboard4()
+    getTopCancelReasons()
+    getTopReturnReasons()
   }, [])
 
   return (
@@ -237,6 +254,82 @@ function HomePage(props) {
                     </TableHead>
                     <TableBody>
                       {dashboard4.map((result, index) => (
+                        <StyledTableRow key={index}>
+                          {Object.keys(result).map(function (key) {
+                            return (
+                              <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                            )
+                          })}
+                        </StyledTableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              }
+            </Item>
+          </Grid>
+        </Grid>
+
+
+        <div className='header'>
+          <Grid container>
+            <Grid item xs={12}>
+              <Item><h2>Bad Order Highlight</h2></Item>
+            </Grid>
+          </Grid>
+        </div>
+
+        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
+
+          <Grid item xs={6}>
+            <Item>
+              <h4>Top 5 Cancellation Reasons</h4>
+              {topCancelReasons.length !== 0 &&
+                <TableContainer component={Paper}>
+                  <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                    <TableHead>
+                      <TableRow>
+                        {Object.keys(topCancelReasons[0]).map(function (key) {
+                          return (
+                            <StyledTableCell align="left">{key}</StyledTableCell>
+                          )
+                        })}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {topCancelReasons.map((result, index) => (
+                        <StyledTableRow key={index}>
+                          {Object.keys(result).map(function (key) {
+                            return (
+                              <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                            )
+                          })}
+                        </StyledTableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              }
+            </Item>
+          </Grid>
+
+          <Grid item xs={6}>
+            <Item>
+              <h4>Top 5 Return Reasons</h4>
+              {topReturnReasons.length !== 0 &&
+                <TableContainer component={Paper}>
+                  <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                    <TableHead>
+                      <TableRow>
+                        {Object.keys(topReturnReasons[0]).map(function (key) {
+                          return (
+                            <StyledTableCell align="left">{key}</StyledTableCell>
+                          )
+                        })}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {topReturnReasons.map((result, index) => (
                         <StyledTableRow key={index}>
                           {Object.keys(result).map(function (key) {
                             return (
