@@ -63,40 +63,21 @@ router.post('/suppliers/filter', async (req, res, next) => {
         const filter = []
         const taiwanCountryFilter = body.taiwanCountry;
         const taiwanTownFilter = body.taiwanTown;
+        let conditionQuery = [];
         if (taiwanTownFilter && taiwanCountryFilter) {
-            filter.push(Sequelize.where(Sequelize.fn(`ST_Within`, Sequelize.col('supplier_geom'),
-                Sequelize.literal(`(SELECT geom FROM taiwan_town WHERE towneng = '${taiwanTownFilter}' AND countyid = (SELECT countyid FROM taiwan_county WHERE countyeng = '${taiwanCountryFilter}'))`)), true))
+            conditionQuery.push(`ST_Within(s.supplier_geom, (SELECT geom FROM taiwan_town WHERE towneng = '${taiwanTownFilter}' AND countyid = (SELECT countyid FROM taiwan_county WHERE countyeng = '${taiwanCountryFilter}') LIMIT 1))`)
         } else if (taiwanCountryFilter) {
-            filter.push(Sequelize.where(Sequelize.fn(`ST_Within`, Sequelize.col('supplier_geom'),
-                Sequelize.literal(`(SELECT geom FROM taiwan_county WHERE countyeng = '${taiwanCountryFilter}')`)), true))
+            conditionQuery.push(`ST_Within(s.supplier_geom, (SELECT geom FROM taiwan_county WHERE countyeng = '${taiwanCountryFilter}' LIMIT 1))`)
         }
         const nameFilter = body.name;
         if (nameFilter) {
-            const queryOrNameFilter = [];
             if (!isNaN(nameFilter)) {
-                queryOrNameFilter.push({
-                    supplierId: nameFilter
-                })
+                conditionQuery.push(`(s.supplier_id = ${nameFilter} OR s.supplier_name LIKE '%${nameFilter}%')`)
+            } else {
+                conditionQuery.push(`s.supplier_name LIKE '%${nameFilter}%'`)
             }
-            queryOrNameFilter.push({
-                supplierName: {
-                    [Op.like]: `%${nameFilter}%`
-                }
-            })
-            filter.push({
-                [Op.or]: [...queryOrNameFilter]
-            })
-        }
-        const addressFilter = body.address;
-        if (addressFilter) {
-            filter.push({
-                supplierAddress: {
-                    [Op.like]: `%${addressFilter}%`
-                }
-            })
         }
         const orderPeriodFilter = body.orderPeriod;
-        const joinOrderFilters = [];
         if (orderPeriodFilter) {
             const startPeriod = new Date(orderPeriodFilter)
             startPeriod.setHours(0)
@@ -110,12 +91,7 @@ router.post('/suppliers/filter', async (req, res, next) => {
             endPeriod.setSeconds(59)
             endPeriod.setMilliseconds(59)
 
-            joinOrderFilters.push({
-                orderTime: {
-                    [Op.gte]: startPeriod,
-                    [Op.lte]: endPeriod
-                }
-            })
+            conditionQuery.push(`o.order_time >= ${startPeriod} AND o.order_time <= ${endPeriod}`)
         }
 
         const zipCodeFilter = body.zipCode;
@@ -123,70 +99,51 @@ router.post('/suppliers/filter', async (req, res, next) => {
             filter.push({
                 supplierZipcode: zipCodeFilter
             })
+            conditionQuery.push(`s.supplier_zipcode = '${zipCodeFilter}'`)
         }
 
         const fileSourceFilter = body.fileSource;
-        const joinProductFilters = [];
         if (fileSourceFilter) {
-            joinProductFilters.push({
-                fileSource: fileSourceFilter
-            });
+            conditionQuery.push(`p.file_source = '${fileSourceFilter}'`)
         }
 
-        let findOptions = {
-            where: Sequelize.and(...filter),
-            limit: size,
-            offset: (page - 1) * size
-        };
-
-        if (joinProductFilters.length > 0 || joinOrderFilters.length > 0) {
-            findOptions.include = [{
-                model: Product,
-                as: 'products',
-                required: joinProductFilters.length > 0,
-                where: Sequelize.and(...joinProductFilters),
-                include: [{
-                    model: Order,
-                    as: 'orders',
-                    required: joinOrderFilters.length > 0,
-                    where: Sequelize.and(...joinOrderFilters)
-                }]
-            }]
+        let conditionRawQuery = ''
+        if (conditionQuery.length > 0) {
+            conditionRawQuery += 'WHERE '
+            for (const condition of conditionQuery) {
+                conditionRawQuery += ` ${condition}`
+                conditionRawQuery += ' AND'
+            }
+            conditionRawQuery = conditionRawQuery.replace(/ AND$/, '')
         }
 
-        const sortedBy = body.sortedBy;
-        const sortDirection = body.sortDirection;
-        if (sortedBy && sortDirection) {
-            findOptions.order = [
-                [sortedBy, sortDirection]
-            ]
+        let orderByQuery = '';
+        if (!!body.sortedBy && !!body.sortDirection) {
+            orderByQuery += `ORDER BY ${body.sortedBy} ${body.sortDirection}`
         }
+        let limitOffsetQuery = ` LIMIT ${size} OFFSET ${(page - 1) * size}`;
 
-        const suppliers = await Supplier.findAll(findOptions)
+        let query = `SELECT s.*, COUNT(o.rg_id) as total_orders, COUNT(p.product_id) as total_products
+                     FROM suppliers s
+                              JOIN products p ON s.supplier_id = p.supplier_id
+                              JOIN orders o ON p.product_id = o.product_id ${conditionRawQuery} 
+                     GROUP BY s.supplier_id ${orderByQuery} ${limitOffsetQuery}`
 
-        delete findOptions.limit
-        delete findOptions.offset
-        const totalCount = await Supplier.count(findOptions)
-        for (let supplier of suppliers) {
-            const [orderCountResult, orderCountMetadata] = await sequelize.query(`select count(*)
-                                                                                  from products p
-                                                                                           inner join orders o on p.product_id = o.product_id
-                                                                                  where p.supplier_id = '${supplier.dataValues.supplierId}'`)
-            const totalOrderCount = orderCountResult[0].count
-            supplier.dataValues.totalOrderCount = Number(totalOrderCount)
+        const [suppliers, metadata] = await sequelize.query(query)
 
-            const [productCountResult, productCountMetadata] = await sequelize.query(`select count(*)
-                                                                                      from products p
-                                                                                      where p.supplier_id = '${supplier.dataValues.supplierId}'`)
-            const totalProductCount = productCountResult[0].count
-            supplier.dataValues.totalProductCount = Number(totalProductCount)
-        }
+        let countQuery = `SELECT COUNT(*) as total_rows
+                          FROM (SELECT s.*, COUNT(o.rg_id) as total_orders, COUNT(p.product_id) as total_products
+                                FROM suppliers s
+                                         JOIN products p ON s.supplier_id = p.supplier_id
+                                         JOIN orders o ON p.product_id = o.product_id ${conditionRawQuery} 
+                                GROUP BY s.supplier_id) as t`
+        const [countResult, countResultMetadata] = await sequelize.query(countQuery)
         const response = {
             content: suppliers,
             metadata: {
                 page,
                 size,
-                totalItems: totalCount
+                totalItems: Number(countResult[0]['total_rows'])
             }
         }
         res.send(response)
