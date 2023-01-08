@@ -54,6 +54,9 @@ function HomePage(props) {
   const [topCancelReasons, setTopCancelReasons] = useState([])
   const [topReturnReasons, setTopReturnReasons] = useState([])
 
+  const [productsMostOrders, setProductsMostOrders] = useState([])
+  const [productsMostReturns, setProductsMostReturns] = useState([])
+
   const getDashboard1 = async () => {
     const url = 'http://localhost:5000/dashboard/top-ten-supplier-by-product'
     const response = await axios.get(url);
@@ -90,10 +93,23 @@ function HomePage(props) {
     setTopReturnReasons(response.data)
   }
 
+  const getProductsMostOrders = async () => {
+    const url = 'http://localhost:5000/dashboard/top-ten-products-highest-orders'
+    const response = await axios.get(url);
+    setProductsMostOrders(response.data)
+  }
+
+  const getProductsMostReturns = async () => {
+    const url = 'http://localhost:5000/dashboard/top-ten-products-highest-returns'
+    const response = await axios.get(url);
+    setProductsMostReturns(response.data)
+  }
 
   useEffect(() => {
     getDashboard1()
     getDashboard2()
+    getProductsMostOrders()
+    getProductsMostReturns()
     getDashboard3()
     getDashboard4()
     getTopCancelReasons()
@@ -194,6 +210,99 @@ function HomePage(props) {
             </Item>
           </Grid>
         </Grid>
+
+
+        <div className='header'>
+          <Grid container>
+            <Grid item xs={12}>
+              <Item><h2>Products Highlight</h2></Item>
+            </Grid>
+          </Grid>
+        </div>
+
+        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
+
+          <Grid item xs={6}>
+            <Item>
+              <h4>Top 10 Products with the highest orders</h4>
+              {productsMostOrders.length !== 0 &&
+                <TableContainer component={Paper}>
+                  <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                    <TableHead>
+                      <TableRow>
+                      {Object.keys(productsMostOrders[0]).map(function (key) {
+                          return (
+                            <StyledTableCell align="left">{key}</StyledTableCell>
+                          )
+                        })}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {productsMostOrders.map((result, index) => (
+                        <StyledTableRow key={index}>
+                          {Object.keys(result).map(function (key) {
+                            if (key === 'product_name')
+                            return (
+                              <Link to={"/product/" + result.product_id + "/detail"}>
+                                <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                              </Link>
+                            )
+                            else {
+                              return (
+                                <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                              )
+                            }
+                          })}
+                        </StyledTableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              }
+            </Item>
+          </Grid>
+
+          <Grid item xs={6}>
+            <Item>
+              <h4>Top 10 Products with the highest returns</h4>
+              {productsMostReturns.length !== 0 &&
+                <TableContainer component={Paper}>
+                  <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                    <TableHead>
+                      <TableRow>
+                        {Object.keys(productsMostReturns[0]).map(function (key) {
+                          return (
+                            <StyledTableCell align="left">{key}</StyledTableCell>
+                          )
+                        })}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {productsMostReturns.map((result, index) => (
+                        <StyledTableRow key={index}>
+                          {Object.keys(result).map(function (key) {
+                            if (key === 'product_name')
+                            return (
+                              <Link to={"/product/" + result.product_id + "/detail"}>
+                                <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                              </Link>
+                            )
+                            else {
+                              return (
+                                <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                              )
+                            }
+                          })}
+                        </StyledTableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              }
+            </Item>
+          </Grid>
+        </Grid>
+
 
         <div className='header'>
           <Grid container>

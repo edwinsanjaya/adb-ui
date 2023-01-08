@@ -81,5 +81,41 @@ router.get('/dashboard/top-five-return-order-reason', async (req, res) => {
   }
 })
 
+router.get('/dashboard/top-ten-products-highest-orders', async (req, res) => {
+  try {
+    const products = await pool.query(`SELECT p.product_id, p.product_name, COUNT(*) AS orders
+    FROM orders o
+    JOIN products p on o.product_id = p.product_id
+    GROUP BY p.product_id, p.product_name
+    ORDER BY 3 DESC
+    LIMIT 10;`)
+    res.json(products.rows)
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true, message: 'Internal Server Error' })
+  }
+})
+
+router.get('/dashboard/top-ten-products-highest-returns', async (req, res) => {
+  try {
+    const products = await pool.query(`SELECT T2.product_id, T2.product_name, T1.returns
+      FROM
+      (SELECT o.product_id, COUNT(*) AS returns
+      FROM products_return pr
+      JOIN orders o on pr.rg_id = o.rg_id
+      GROUP BY o.product_id) AS T1
+      JOIN
+      (SELECT p.product_id, p.product_name
+      FROM products p) AS T2
+      ON T1.product_id = T2.product_id
+      ORDER BY returns DESC
+      LIMIT 10;`)
+    res.json(products.rows)
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true, message: 'Internal Server Error' })
+  }
+})
+
 
 module.exports = router;
