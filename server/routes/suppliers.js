@@ -64,7 +64,7 @@ router.post('/suppliers/filter', async (req, res, next) => {
         const size = req.query.size;
         const body = req.body;
         const filter = []
-        const taiwanCountryFilter = body.taiwanCountry;
+        const taiwanCountryFilter = body.taiwanCounty;
         const taiwanTownFilter = body.taiwanTown;
         if (taiwanTownFilter && taiwanCountryFilter) {
             filter.push(Sequelize.where(Sequelize.fn(`ST_Within`, Sequelize.col('supplier_geom'),
