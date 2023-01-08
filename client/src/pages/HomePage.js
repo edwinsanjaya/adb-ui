@@ -9,7 +9,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Stack,
   TextField,
   Button
 } from '@mui/material';
@@ -24,7 +23,6 @@ import dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 import './HomePage.scss'
-import { display, positions } from "@mui/system";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -55,9 +53,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 function HomePage(props) {
-
-  const [dashboard1, setDashboard1] = useState([])
-  const [dashboard2, setDashboard2] = useState([])
   const [dashboard3, setDashboard3] = useState([])
   const [dashboard4, setDashboard4] = useState([])
 
@@ -66,18 +61,6 @@ function HomePage(props) {
 
   const [productsMostOrders, setProductsMostOrders] = useState([])
   const [productsMostReturns, setProductsMostReturns] = useState([])
-
-  const getDashboard1 = async () => {
-    const url = 'http://localhost:5000/dashboard/top-ten-supplier-by-product'
-    const response = await axios.get(url);
-    setDashboard1(response.data)
-  }
-
-  const getDashboard2 = async () => {
-    const url = 'http://localhost:5000/dashboard/top-ten-supplier-by-order'
-    const response = await axios.get(url);
-    setDashboard2(response.data)
-  }
 
   const getDashboard3 = async () => {
     const url = 'http://localhost:5000/dashboard/top-ten-county-by-supplier'
@@ -127,10 +110,6 @@ function HomePage(props) {
   const [suppliersStartTime, setSuppliersStartTime] = useState(dayjs('2011-01-01T00:01:00'))
   const [suppliersEndTime, setSuppliersEndTime] = useState(dayjs('2011-06-29T11:09:00'))
 
-  // function timeout(delay) {
-  //   return new Promise( res => setTimeout(res, delay) );
-  // }
-
   async function filterSuppliers() {
     document.getElementById('supplier-filter-status').innerHTML = "Loading...";
     document.getElementById('suppliers-section').classList.add("loading");
@@ -159,9 +138,7 @@ function HomePage(props) {
 
 
   useEffect(() => {
-    // getDashboard1()
     filterSuppliers()
-    getDashboard2()
     getProductsMostOrders()
     getProductsMostReturns()
     getDashboard3()
