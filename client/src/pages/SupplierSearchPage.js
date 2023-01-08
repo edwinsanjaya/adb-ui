@@ -24,7 +24,7 @@ function SupplierSearchPage(props) {
     const [state, setState] = useState({
         totalItems: 0,
         page: 1,
-        size: 50,
+        size: 10,
         rng: 1,
     })
 
@@ -242,7 +242,6 @@ function SupplierSearchPage(props) {
         <div>
             {/*<div>State: {JSON.stringify(state)}</div>*/}
             <div>Input: {JSON.stringify(inputs)}</div>
-            }
             <Form>
                 <FormGroup row>
                     <Label for="supplier_name" sm={2}>Supplier Name</Label>

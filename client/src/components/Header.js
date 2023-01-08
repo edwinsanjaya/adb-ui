@@ -41,16 +41,9 @@ function Header(args) {
             <NavItem>
               <NavLink href="/products/search">Product</NavLink>
             </NavItem>
-            <UncontrolledDropdown nav inNavbar>
-              <DropdownToggle nav caret>
-                Order
-              </DropdownToggle>
-              <DropdownMenu end>
-                <DropdownItem href="/orders/search">Search</DropdownItem>
-                <DropdownItem divider />
-                <DropdownItem>Map</DropdownItem>
-              </DropdownMenu>
-            </UncontrolledDropdown>
+            <NavItem>
+              <NavLink href="/orders/search">Order</NavLink>
+            </NavItem>
             <UncontrolledDropdown nav inNavbar>
               <DropdownToggle nav caret>
                 Tools

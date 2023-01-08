@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
 import mapboxgl, { LngLat } from 'mapbox-gl';
-import './MapBoxPage.scss';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import axios from 'axios'
 import dayjs from 'dayjs';
