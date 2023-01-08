@@ -303,7 +303,7 @@ function HomePage(props) {
               <div id="suppliers-by-orders-section">
                 <h4>Top 10 Suppliers by Orders</h4>
                 <div className="d-flex align-items-center justify-content-center">
-                  <div>Creation period:</div>
+                  <div>Order period:</div>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DesktopDatePicker
                         name="startTime"
