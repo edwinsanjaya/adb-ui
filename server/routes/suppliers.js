@@ -94,7 +94,7 @@ router.post('/suppliers/filter', async (req, res, next) => {
             endPeriod.setSeconds(59)
             endPeriod.setMilliseconds(59)
 
-            conditionQuery.push(`o.order_time >= '${startPeriod}' AND o.order_time <= '${endPeriod}'`)
+            conditionQuery.push(`o.order_time >= ${startPeriod} AND o.order_time <= ${endPeriod}`)
         }
 
         const zipCodeFilter = body.zipCode;
