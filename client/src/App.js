@@ -17,6 +17,7 @@ import QueryPage from './pages/QueryPage';
 import TestMapPage from './pages/TestMapPage';
 import MapBoxPage from './pages/MapBoxPage';
 import OrderSearchPage from './pages/OrderSearchPage';
+import OrderDetailPage from "./pages/OrderDetailPage";
 
 
 
@@ -34,6 +35,7 @@ function App() {
             <Route exact path="/suppliers/search" element={<SupplierSearchPage/>}/>
             <Route exact path="/supplier/:supplier_id/detail" element={<SupplierDetailPage/>}/>
             <Route exact path="/orders/search" element={<OrderSearchPage/>}/>
+            <Route exact path="/orders/:order_id/detail" element={<OrderDetailPage/>}/>
             <Route exact path="/suppliers/map" element={<SupplierMapPage/>}/>
             <Route exact path="/tools/query" element={<QueryPage/>}></Route>
             <Route exact path="/map/box" element={<MapBoxPage/>}/>
