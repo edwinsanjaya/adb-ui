@@ -59,9 +59,6 @@ function HomePage(props) {
   const [topCancelReasons, setTopCancelReasons] = useState([])
   const [topReturnReasons, setTopReturnReasons] = useState([])
 
-  // const [productsMostOrders, setProductsMostOrders] = useState([])
-  // const [productsMostReturns, setProductsMostReturns] = useState([])
-
   const getDashboard3 = async () => {
     const url = 'http://localhost:5000/dashboard/top-ten-county-by-supplier'
     const response = await axios.get(url);
@@ -92,11 +89,11 @@ function HomePage(props) {
   //   setProductsMostOrders(response.data)
   // }
 
-  // const getProductsMostReturns = async () => {
-  //   const url = 'http://localhost:5000/dashboard/top-ten-products-highest-returns'
-  //   const response = await axios.get(url);
-  //   setProductsMostReturns(response.data)
-  // }
+  const getProductsMostReturns = async () => {
+    const url = 'http://localhost:5000/dashboard/top-ten-products-highest-returns'
+    const response = await axios.get(url);
+    setProductsMostReturns(response.data)
+  }
 
   // Suppliers - Filter
   const [suppliersByProducts, setSuppliersByProducts] = useState([])
@@ -165,47 +162,69 @@ function HomePage(props) {
   const [productsMostReturns, setProductsMostReturns] = useState([])
   
   var products_search = {
-    startTime: 0,
-    endTime: 0
+    orderStartTime: 0,
+    orderEndTime: 0,
+    returnStartTime: 0,
+    returnEndTime: 0
   }
 
-  const [productsStartTime, setProductsStartTime] = useState(dayjs('2011-01-01T00:01:00'))
-  const [productsEndTime, setProductsEndTime] = useState(dayjs('2011-06-29T11:09:00'))
+  const [productsOrderStartTime, setProductsOrderStartTime] = useState(dayjs('2011-01-01T00:01:00'))
+  const [productsOrderEndTime, setProductsOrderEndTime] = useState(dayjs('2011-06-30T00:00:00'))
+  const [productsReturnStartTime, setProductsReturnStartTime] = useState(dayjs('2011-10-01T00:00:00'))
+  const [productsReturnEndTime, setProductsReturnEndTime] = useState(dayjs('2012-07-31T00:00:00'))
 
-  async function filterProducts() {
-    document.getElementById('products-filter-status').innerHTML = "Loading...";
-    document.getElementById('products-section').classList.add("loading");
+  async function filterProductsHighestOrders() {
+    document.getElementById('products-highest-orders-filter-status').innerHTML = "Loading...";
+    document.getElementById('products-highest-orders-section').classList.add("loading");
 
-    const url_1 = 'http://localhost:5000/dashboard/filter/top-ten-products-with-highest-orders'
-    const url_2 = 'http://localhost:5000/dashboard/filter/top-ten-products-with-highest-returns'
+    const url = 'http://localhost:5000/dashboard/filter/top-ten-products-with-highest-orders'
 
-    products_search.startTime = productsStartTime.valueOf()
-    products_search.endTime = productsEndTime.valueOf()
+    products_search.orderStartTime = productsOrderStartTime.valueOf()
+    products_search.orderEndTime = productsOrderEndTime.valueOf()
 
     const data = {
-      startPeriod: products_search.startTime,
-      endPeriod: products_search.endTime,
+      startPeriod: products_search.orderStartTime,
+      endPeriod: products_search.orderEndTime,
     }
 
-    const response_1 = await axios.post(url_1, data);
-    setProductsMostOrders(response_1.data);
+    const response = await axios.post(url, data);
+    setProductsMostOrders(response.data);
 
-    const response_2 = await axios.post(url_2, data);
-    setProductsMostReturns(response_2.data);
-
-    document.getElementById('products-filter-status').innerHTML = "Done!";
-    document.getElementById('products-section').classList.remove("loading");
-    document.getElementById('products-filter-status').innerHTML = "";
+    document.getElementById('products-highest-orders-filter-status').innerHTML = "Done!";
+    document.getElementById('products-highest-orders-section').classList.remove("loading");
+    document.getElementById('products-highest-orders-filter-status').innerHTML = "";
   }
+
+  // async function filterProductsHighestReturns() {
+  //   document.getElementById('products-highest-returns-filter-status').innerHTML = "Loading...";
+  //   document.getElementById('products-highest-returns-section').classList.add("loading");
+
+  //   const url = 'http://localhost:5000/dashboard/filter/top-ten-products-with-highest-returns'
+
+  //   products_search.returnStartTime = productsReturnStartTime.valueOf()
+  //   products_search.returnEndTime = productsReturnEndTime.valueOf()
+
+  //   const data = {
+  //     startPeriod: products_search.returnStartTime,
+  //     endPeriod: products_search.returnEndTime,
+  //   }
+
+  //   const response = await axios.post(url, data);
+  //   setProductsMostReturns(response.data);
+
+  //   document.getElementById('products-highest-returns-filter-status').innerHTML = "Done!";
+  //   document.getElementById('products-highest-returns-section').classList.remove("loading");
+  //   document.getElementById('products-highest-returns-filter-status').innerHTML = "";
+  // }
 
 
 
   useEffect(() => {
     filterSuppliersByProducts()
     filterSuppliersByOrders()
-    filterProducts()
-    // getProductsMostOrders()
-    // getProductsMostReturns()
+    filterProductsHighestOrders()
+    // filterProductsHighestReturns()
+    getProductsMostReturns()
     getDashboard3()
     getDashboard4()
     getTopCancelReasons()
@@ -378,39 +397,6 @@ function HomePage(props) {
             <Grid container>
               <Grid item xs={12}>
                 <Item><h2>Products Highlight</h2></Item>
-                <Item>
-                  <div className="d-flex align-items-center justify-content-center">
-                    <div>Order/Return period:</div>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DesktopDatePicker
-                      name="startTime"
-                      label="Start Date"
-                      inputFormat="MM/DD/YYYY"
-                      minDate="01/01/2011"
-                      maxDate="06/29/2011"
-                      value={productsStartTime}
-                      onChange={(value) => {
-                        setProductsStartTime(value);
-                      }}
-                      renderInput={(params) => <TextField {...params} />}
-                    />
-                    <DesktopDatePicker
-                      name="endTime"
-                      label="End Date"
-                      inputFormat="MM/DD/YYYY"
-                      minDate="01/01/2011"
-                      maxDate="06/29/2011"
-                      value={productsEndTime}
-                      onChange={(value) => {
-                        setProductsEndTime(value);
-                      }}
-                      renderInput={(params) => <TextField {...params} />}
-                    />
-                  </LocalizationProvider>
-                  <Button className="search-button" variant="contained" onClick={filterProducts}>Search</Button>
-                  </div>
-                  <div id="products-filter-status" style={{color: '#00a600', fontSize: '16px', fontWeight: 'bold', margin: '8px'}}></div>
-                </Item>
               </Grid>
             </Grid>
           </div>
@@ -418,81 +404,149 @@ function HomePage(props) {
           <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
             <Grid item xs={6}>
               <Item>
-                <h4>Top 10 Products with the highest orders</h4>
-                {productsMostOrders.length !== 0 &&
-                  <TableContainer component={Paper}>
-                    <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                      <TableHead>
-                        <TableRow>
-                        {Object.keys(productsMostOrders[0]).map(function (key) {
-                            return (
-                              <StyledTableCell align="left">{key}</StyledTableCell>
-                            )
-                          })}
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {productsMostOrders.map((result, index) => (
-                          <StyledTableRow key={index}>
-                            {Object.keys(result).map(function (key) {
-                              if (key === 'product_name')
+                <div id="products-highest-orders-section">
+                  <h4>Top 10 Products with the highest orders</h4>
+                  <div className="d-flex align-items-center justify-content-center">
+                    <div>Order period:</div>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DesktopDatePicker
+                        name="startTime"
+                        label="Start Date"
+                        inputFormat="MM/DD/YYYY"
+                        minDate="01/01/2011"
+                        maxDate="06/30/2011"
+                        value={productsOrderStartTime}
+                        onChange={(value) => {
+                          setProductsOrderStartTime(value);
+                        }}
+                        renderInput={(params) => <TextField {...params} />}
+                      />
+                      <DesktopDatePicker
+                        name="endTime"
+                        label="End Date"
+                        inputFormat="MM/DD/YYYY"
+                        minDate="01/01/2011"
+                        maxDate="06/30/2011"
+                        value={productsOrderEndTime}
+                        onChange={(value) => {
+                          setProductsOrderEndTime(value);
+                        }}
+                        renderInput={(params) => <TextField {...params} />}
+                      />
+                    </LocalizationProvider>
+                    <Button className="search-button" variant="contained" onClick={filterProductsHighestOrders}>Search</Button>
+                  </div>
+                  <div id="products-highest-orders-filter-status" style={{color: '#00a600', fontSize: '16px', fontWeight: 'bold', margin: '8px'}}></div>
+
+                  {productsMostOrders.length !== 0 &&
+                    <TableContainer component={Paper}>
+                      <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                        <TableHead>
+                          <TableRow>
+                          {Object.keys(productsMostOrders[0]).map(function (key) {
                               return (
-                                <Link to={"/product/" + result.product_id + "/detail"}>
-                                  <StyledTableCell align="left">{result[key]}</StyledTableCell>
-                                </Link>
+                                <StyledTableCell align="left">{key}</StyledTableCell>
                               )
-                              else {
-                                return (
-                                  <StyledTableCell align="left">{result[key]}</StyledTableCell>
-                                )
-                              }
                             })}
-                          </StyledTableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                }
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {productsMostOrders.map((result, index) => (
+                            <StyledTableRow key={index}>
+                              {Object.keys(result).map(function (key) {
+                                if (key === 'product_name')
+                                return (
+                                  <Link to={"/product/" + result.product_id + "/detail"}>
+                                    <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                                  </Link>
+                                )
+                                else {
+                                  return (
+                                    <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                                  )
+                                }
+                              })}
+                            </StyledTableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  }
+                </div>
               </Item>
             </Grid>
 
             <Grid item xs={6}>
               <Item>
-                <h4>Top 10 Products with the highest returns</h4>
-                {productsMostReturns.length !== 0 &&
-                  <TableContainer component={Paper}>
-                    <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                      <TableHead>
-                        <TableRow>
-                          {Object.keys(productsMostReturns[0]).map(function (key) {
-                            return (
-                              <StyledTableCell align="left">{key}</StyledTableCell>
-                            )
-                          })}
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {productsMostReturns.map((result, index) => (
-                          <StyledTableRow key={index}>
-                            {Object.keys(result).map(function (key) {
-                              if (key === 'product_name')
+                <div id="products-highest-returns-section">
+                  <h4>Top 10 Products with the highest returns</h4>
+                  <div className="d-flex align-items-center justify-content-center" style={{paddingTop: '64px'}}>
+                      {/* <div>Return period:</div>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DesktopDatePicker
+                          name="startTime"
+                          label="Start Date"
+                          inputFormat="MM/DD/YYYY"
+                          minDate="10/01/2011"
+                          maxDate="07/31/2012"
+                          value={productsReturnStartTime}
+                          onChange={(value) => {
+                            setProductsReturnStartTime(value);
+                          }}
+                          renderInput={(params) => <TextField {...params} />}
+                        />
+                        <DesktopDatePicker
+                          name="endTime"
+                          label="End Date"
+                          inputFormat="MM/DD/YYYY"
+                          minDate="10/01/2011"
+                          maxDate="07/31/2012"
+                          value={productsReturnEndTime}
+                          onChange={(value) => {
+                            setProductsReturnEndTime(value);
+                          }}
+                          renderInput={(params) => <TextField {...params} />}
+                        />
+                      </LocalizationProvider>
+                      <Button className="search-button" variant="contained" onClick={filterProductsHighestReturns}>Search</Button> */}
+                    </div>
+                    {/* <div id="products-highest-returns-filter-status" style={{color: '#00a600', fontSize: '16px', fontWeight: 'bold', margin: '8px'}}></div> */}
+
+                  {productsMostReturns.length !== 0 &&
+                    <TableContainer component={Paper}>
+                      <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                        <TableHead>
+                          <TableRow>
+                            {Object.keys(productsMostReturns[0]).map(function (key) {
                               return (
-                                <Link to={"/product/" + result.product_id + "/detail"}>
-                                  <StyledTableCell align="left">{result[key]}</StyledTableCell>
-                                </Link>
+                                <StyledTableCell align="left">{key}</StyledTableCell>
                               )
-                              else {
-                                return (
-                                  <StyledTableCell align="left">{result[key]}</StyledTableCell>
-                                )
-                              }
                             })}
-                          </StyledTableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                }
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {productsMostReturns.map((result, index) => (
+                            <StyledTableRow key={index}>
+                              {Object.keys(result).map(function (key) {
+                                if (key === 'product_name')
+                                return (
+                                  <Link to={"/product/" + result.product_id + "/detail"}>
+                                    <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                                  </Link>
+                                )
+                                else {
+                                  return (
+                                    <StyledTableCell align="left">{result[key]}</StyledTableCell>
+                                  )
+                                }
+                              })}
+                            </StyledTableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  }
+                </div>
               </Item>
             </Grid>
           </Grid>

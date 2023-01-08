@@ -133,21 +133,21 @@ router.post("/dashboard/filter/top-ten-suppliers-by-products", async (req, res, 
         console.log("Query supplier by products, " , startPeriod , " " , endPeriod)
   
       let query = await pool.query(`
-      SELECT supplier_id,
-        (SELECT supplier_name FROM suppliers WHERE products.supplier_id = suppliers.supplier_id),
-        count(*) total_products
-      FROM products
-      WHERE supplier_id in (SELECT DISTINCT supplier_id FROM suppliers)
-        AND created_at >= '${startPeriod}' AND created_at <= '${endPeriod}'
-      GROUP BY supplier_id
-      ORDER BY total_products DESC
-      LIMIT 10
+        SELECT supplier_id,
+          (SELECT supplier_name FROM suppliers WHERE products.supplier_id = suppliers.supplier_id),
+          count(*) total_products
+        FROM products
+        WHERE supplier_id in (SELECT DISTINCT supplier_id FROM suppliers)
+          AND created_at >= '${startPeriod}' AND created_at <= '${endPeriod}'
+        GROUP BY supplier_id
+        ORDER BY total_products DESC
+        LIMIT 10
         `)
       res.json(query.rows)
       }
     } catch (error) {
       console.log(error);
-      res.status(500).send({ error: true, message: 'Internal Server Error' })
+      res.status(500).json({ error: true, message: 'Internal Server Error' })
     }
 })
 
@@ -157,7 +157,7 @@ router.post("/dashboard/filter/top-ten-suppliers-by-orders", async (req, res, ne
       if(req.body.startPeriod == 1293840060000 & req.body.endPeriod == 1309345740000)
       {
         const query = await pool.query("SELECT products.supplier_id AS supplier_id, (SELECT supplier_name FROM suppliers WHERE products.supplier_id = suppliers.supplier_id), count(*) AS total_orders FROM orders INNER JOIN products ON orders.product_id = products.product_id GROUP BY supplier_id ORDER BY total_orders DESC LIMIT 10;")
-        res.send(query.rows)
+        res.sejsonnd(query.rows)
       }
       else 
       {
@@ -181,7 +181,7 @@ router.post("/dashboard/filter/top-ten-suppliers-by-orders", async (req, res, ne
       }
     } catch (error) {
       console.log(error);
-      res.status(500).send({ error: true, message: 'Internal Server Error' })
+      res.status(500).json({ error: true, message: 'Internal Server Error' })
     }
 })
 
@@ -198,7 +198,7 @@ router.post("/dashboard/filter/top-ten-products-with-highest-orders", async (req
         ORDER BY 3 DESC
         LIMIT 10;
         `);
-        res.send(query.rows)
+        res.json(query.rows)
       }
       else 
       {
@@ -216,19 +216,20 @@ router.post("/dashboard/filter/top-ten-products-with-highest-orders", async (req
         ORDER BY 3 DESC
         LIMIT 10;
         `)
-      res.send(query.rows)
+      res.json(query.rows)
       }
     } catch (error) {
       console.log(error);
-      res.status(500).send({ error: true, message: 'Internal Server Error' })
+      res.status(500).json({ error: true, message: 'Internal Server Error' })
     }
 })
 
 // Products - Filter products with the highest returns by return date
 router.post("/dashboard/filter/top-ten-products-with-highest-returns", async (req, res, next) => {
   try {
-      if(req.body.startPeriod == 1293840060000 & req.body.endPeriod == 1309345740000)
+      if(req.body.startPeriod == 1317427200000 & req.body.endPeriod == 1317427260000)
       {
+        console.log()
         const query = await pool.query(`
         SELECT T2.product_id, T2.product_name, T1.returns
         FROM
@@ -243,7 +244,7 @@ router.post("/dashboard/filter/top-ten-products-with-highest-returns", async (re
         ORDER BY returns DESC
         LIMIT 10;
         `);
-        res.send(query.rows)
+        res.json(query.rows)
       }
       else 
       {
@@ -252,26 +253,26 @@ router.post("/dashboard/filter/top-ten-products-with-highest-returns", async (re
   
         console.log("Query products by returns, " , startPeriod , " " , endPeriod)
   
-      let query = await pool.query(`
+      const query = await pool.query(`
         SELECT T2.product_id, T2.product_name, T1.returns
         FROM
           (SELECT o.product_id, COUNT(*) AS returns
           FROM products_return pr
           JOIN orders o on pr.rg_id = o.rg_id
+          WHERE return_complete_time >= '${startPeriod}' AND return_complete_time <= '${endPeriod}'
           GROUP BY o.product_id) AS T1
         JOIN
           (SELECT p.product_id, p.product_name
           FROM products p) AS T2
           ON T1.product_id = T2.product_id
-        WHERE return_complete_time >= '${startPeriod}' AND return_complete_time <= '${endPeriod}'
         ORDER BY returns DESC
         LIMIT 10;
         `)
-      res.send(query.rows)
+      res.json(query.rows)
       }
     } catch (error) {
       console.log(error);
-      res.status(500).send({ error: true, message: 'Internal Server Error' })
+      res.status(500).json({ error: true, message: 'Internal Server Error' })
     }
 })
 
