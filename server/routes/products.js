@@ -4,14 +4,14 @@ const {Op, Sequelize} = require('sequelize');
 const {pool, sequelize} = require('../db.js')
 
 router.get('/products/supplier_id/:supplier_id', async (req, res) => {
-  try {
-      const {supplier_id} = req.params
-      const products = await pool.query("SELECT * FROM products WHERE supplier_id = $1 LIMIT 50", [supplier_id])
-      res.json(products.rows)
-  } catch (error) {
-      console.log(error);
-      res.status(500).json({error: true, message: 'Internal Server Error'})
-  }
+    try {
+        const {supplier_id} = req.params
+        const products = await pool.query("SELECT * FROM products WHERE supplier_id = $1 LIMIT 50", [supplier_id])
+        res.json(products.rows)
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({error: true, message: 'Internal Server Error'})
+    }
 })
 
 router.get("/products/search", async (req, res) => {
@@ -91,6 +91,13 @@ router.post("/products/filter", async (req, res, next) => {
         if (!isNaN(categoryFilter)) {
             productQueryFilters.push({
                 category: categoryFilter
+            })
+        }
+
+        const productIdsFilter = body.productIds;
+        if (!!productIdsFilter && productIdsFilter.length > 0){
+            productQueryFilters.push({
+                productId: productIdsFilter
             })
         }
 

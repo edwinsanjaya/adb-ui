@@ -189,4 +189,17 @@ router.post('/orders/filter', async (req, res, next) => {
   }
 })
 
+router.get('/orders/:order_id', async (req, res) => {
+    try {
+        const {order_id} = req.params
+        const orders = await pool.query(`SELECT *
+                                         FROM orders
+                                         WHERE rg_id = $1`, [order_id])
+        res.json(orders.rows)
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({error: true, message: 'Internal Server Error'})
+    }
+})
+
 module.exports = router;

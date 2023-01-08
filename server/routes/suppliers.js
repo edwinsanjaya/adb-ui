@@ -9,7 +9,10 @@ const {pool, sequelize} = require('../db.js')
 router.get('/suppliers/product_id/:product_id', async (req, res) => {
     try {
         const {product_id} = req.params
-        const product = await pool.query("SELECT supplier_id, COUNT(*) total_products, (SELECT supplier_name FROM suppliers where suppliers.supplier_id = products.supplier_id) FROM products WHERE product_id = $1 AND supplier_id in (SELECT DISTINCT supplier_id FROM suppliers) GROUP BY supplier_id ORDER BY total_products DESC", [product_id])
+
+        let product_ids = product_id.split(',').map(x => parseInt(x))
+        // Calon" SQL Injection XD
+        const product = await pool.query("SELECT supplier_id, COUNT(*) total_products, (SELECT supplier_name FROM suppliers where suppliers.supplier_id = products.supplier_id) FROM products WHERE product_id IN (" + product_id + ") AND supplier_id in (SELECT DISTINCT supplier_id FROM suppliers) GROUP BY supplier_id ORDER BY total_products DESC")
         res.json(product.rows)
     } catch (error) {
         console.log(error);
