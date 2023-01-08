@@ -9,12 +9,22 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Stack,
+  TextField,
+  Button
 } from '@mui/material';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import axios from "axios"
 import { Link } from 'react-router-dom'
+import {
+  LocalizationProvider,
+  DesktopDatePicker,
+} from '@mui/x-date-pickers';
+import dayjs from 'dayjs';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 import './HomePage.scss'
+import { display, positions } from "@mui/system";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -105,8 +115,52 @@ function HomePage(props) {
     setProductsMostReturns(response.data)
   }
 
+
+  const [suppliersByProducts, setSuppliersByProducts] = useState([])
+  const [suppliersByOrders, setSuppliersByOrders] = useState([])
+  
+  var suppliers_search = {
+    startTime: 0,
+    endTime: 0
+  }
+
+  const [suppliersStartTime, setSuppliersStartTime] = useState(dayjs('2011-01-01T00:01:00'))
+  const [suppliersEndTime, setSuppliersEndTime] = useState(dayjs('2011-06-29T11:09:00'))
+
+  // function timeout(delay) {
+  //   return new Promise( res => setTimeout(res, delay) );
+  // }
+
+  async function filterSuppliers() {
+    document.getElementById('supplier-filter-status').innerHTML = "Loading...";
+    document.getElementById('suppliers-section').classList.add("loading");
+
+    const url_1 = 'http://localhost:5000/dashboard/filter/top-ten-suppliers-by-products'
+    const url_2 = 'http://localhost:5000/dashboard/filter/top-ten-suppliers-by-orders'
+
+    suppliers_search.startTime = suppliersStartTime.valueOf()
+    suppliers_search.endTime = suppliersEndTime.valueOf()
+
+    const data = {
+      startPeriod: suppliers_search.startTime,
+      endPeriod: suppliers_search.endTime,
+    }
+
+    const response_1 = await axios.post(url_1, data);
+    setSuppliersByProducts(response_1.data);
+
+    const response_2 = await axios.post(url_2, data);
+    setSuppliersByOrders(response_2.data);
+
+    document.getElementById('supplier-filter-status').innerHTML = "Done!";
+    document.getElementById('suppliers-section').classList.remove("loading");
+    document.getElementById('supplier-filter-status').innerHTML = "";
+  }
+
+
   useEffect(() => {
-    getDashboard1()
+    // getDashboard1()
+    filterSuppliers()
     getDashboard2()
     getProductsMostOrders()
     getProductsMostReturns()
@@ -119,26 +173,58 @@ function HomePage(props) {
   return (
     <div>
       <Box sx={{ width: '100%' }}>
-
+        <div id="suppliers-section">
         <div className='header'>
           <Grid container>
             <Grid item xs={12}>
               <Item><h2>Suppliers Highlight</h2></Item>
+              <Item>
+                <div className="d-flex align-items-center justify-content-center">
+                  <div>Created at/Order period:</div>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DesktopDatePicker
+                    name="startTime"
+                    label="Start Date"
+                    inputFormat="MM/DD/YYYY"
+                    minDate="01/01/2011"
+                    maxDate="06/29/2011"
+                    value={suppliersStartTime}
+                    onChange={(value) => {
+                      setSuppliersStartTime(value);
+                    }}
+                    renderInput={(params) => <TextField {...params} />}
+                  />
+                  <DesktopDatePicker
+                    name="endTime"
+                    label="End Date"
+                    inputFormat="MM/DD/YYYY"
+                    minDate="01/01/2011"
+                    maxDate="06/29/2011"
+                    value={suppliersEndTime}
+                    onChange={(value) => {
+                      setSuppliersEndTime(value);
+                    }}
+                    renderInput={(params) => <TextField {...params} />}
+                  />
+                </LocalizationProvider>
+                <Button className="search-button" variant="contained" onClick={filterSuppliers}>Search</Button>
+                </div>
+                <div id="supplier-filter-status" style={{color: '#00a600', fontSize: '16px', fontWeight: 'bold', margin: '8px'}}></div>
+              </Item>
             </Grid>
           </Grid>
         </div>
-
 
         <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
           <Grid item xs={6}>
             <Item>
               <h4>Top 10 Suppliers by Products</h4>
-              {dashboard1.length !== 0 &&
+              {suppliersByProducts.length !== 0 &&
                 <TableContainer component={Paper}>
                   <Table sx={{ minWidth: 700 }} aria-label="customized table">
                     <TableHead>
                       <TableRow>
-                        {Object.keys(dashboard1[0]).map(function (key) {
+                        {Object.keys(suppliersByProducts[0]).map(function (key) {
                           return (
                             <StyledTableCell align="left">{key}</StyledTableCell>
                           )
@@ -146,7 +232,7 @@ function HomePage(props) {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {dashboard1.map((result, index) => (
+                      {suppliersByProducts.map((result, index) => (
                         <StyledTableRow key={index}>
                           {Object.keys(result).map(function (key) {
                             if (key === 'supplier_name')
@@ -173,12 +259,12 @@ function HomePage(props) {
           <Grid item xs={6}>
             <Item>
               <h4>Top 10 Suppliers by Orders</h4>
-              {dashboard2.length !== 0 &&
+              {suppliersByOrders.length !== 0 &&
                 <TableContainer component={Paper}>
                   <Table sx={{ minWidth: 700 }} aria-label="customized table">
                     <TableHead>
                       <TableRow>
-                        {Object.keys(dashboard2[0]).map(function (key) {
+                        {Object.keys(suppliersByOrders[0]).map(function (key) {
                           return (
                             <StyledTableCell align="left">{key}</StyledTableCell>
                           )
@@ -186,7 +272,7 @@ function HomePage(props) {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {dashboard2.map((result, index) => (
+                      {suppliersByOrders.map((result, index) => (
                         <StyledTableRow key={index}>
                           {Object.keys(result).map(function (key) {
                             if (key === 'supplier_name')
@@ -210,7 +296,7 @@ function HomePage(props) {
             </Item>
           </Grid>
         </Grid>
-
+        </div>
 
         <div className='header'>
           <Grid container>

@@ -117,5 +117,73 @@ router.get('/dashboard/top-ten-products-highest-returns', async (req, res) => {
   }
 })
 
+// Supplier - Filter products by created_at period 
+router.post("/dashboard/filter/top-ten-suppliers-by-products", async (req, res, next) => {
+  try {
+      if(req.body.startPeriod == 1293840060000 & req.body.endPeriod == 1309345740000)
+      {
+        const query = await pool.query("SELECT supplier_id,(SELECT supplier_name FROM suppliers WHERE products.supplier_id = suppliers.supplier_id), count(*) total_products FROM products WHERE supplier_id in (SELECT DISTINCT supplier_id FROM suppliers) GROUP BY supplier_id ORDER BY total_products DESC LIMIT 10;")
+        res.send(query.rows)
+      }
+      else 
+      {
+        const startPeriod = new Date(req.body.startPeriod).toISOString()
+        const endPeriod = new Date(req.body.endPeriod).toISOString()
+  
+        console.log("Query supplier by products, " , startPeriod , " " , endPeriod)
+  
+      let query = await pool.query(`
+      SELECT supplier_id,
+        (SELECT supplier_name FROM suppliers WHERE products.supplier_id = suppliers.supplier_id),
+        count(*) total_products
+      FROM products
+      WHERE supplier_id in (SELECT DISTINCT supplier_id FROM suppliers)
+        AND created_at >= '2011-01-01' AND created_at <= '2011-06-21'
+      GROUP BY supplier_id
+      ORDER BY total_products DESC
+      LIMIT 10
+        `)
+      res.json(query.rows)
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: true, message: 'Internal Server Error' })
+    }
+})
+
+// Supplier - Filter order by order period 
+router.post("/dashboard/filter/top-ten-suppliers-by-orders", async (req, res, next) => {
+  try {
+      if(req.body.startPeriod == 1293840060000 & req.body.endPeriod == 1309345740000)
+      {
+        const query = await pool.query("SELECT products.supplier_id AS supplier_id, (SELECT supplier_name FROM suppliers WHERE products.supplier_id = suppliers.supplier_id), count(*) AS total_orders FROM orders INNER JOIN products ON orders.product_id = products.product_id GROUP BY supplier_id ORDER BY total_orders DESC LIMIT 10;")
+        res.send(query.rows)
+      }
+      else 
+      {
+        const startPeriod = new Date(req.body.startPeriod).toISOString()
+        const endPeriod = new Date(req.body.endPeriod).toISOString()
+  
+        console.log("Query supplier by orders, " , startPeriod , " " , endPeriod)
+  
+      let query = await pool.query(`
+        SELECT products.supplier_id AS supplier_id,
+          (SELECT supplier_name FROM suppliers WHERE products.supplier_id = suppliers.supplier_id),
+          count(*) AS total_orders
+        FROM orders
+          INNER JOIN products ON orders.product_id = products.product_id
+        WHERE order_time >= '${startPeriod}' AND order_time <= '${endPeriod}'
+        GROUP BY supplier_id
+        ORDER BY total_orders DESC
+        LIMIT 10
+        `)
+      res.json(query.rows)
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: true, message: 'Internal Server Error' })
+    }
+})
+
 
 module.exports = router;
