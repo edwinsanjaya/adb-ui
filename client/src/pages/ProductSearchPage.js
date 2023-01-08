@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Table, Col, Button, Form, FormGroup, Label, Input, FormText } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Pagination, TablePagination } from '@mui/material'
+import { Box, Pagination, TablePagination } from '@mui/material'
 
 function ProductSearchPage(props) {
 
@@ -79,63 +79,65 @@ function ProductSearchPage(props) {
   return (
     <div>
       {/* <div>Test result: {JSON.stringify(products)}</div> */}
-      <Form>
-        <FormGroup row>
-          <Label for="product_name" sm={2}>Search Product</Label>
-          <Col sm={10}>
-            <Input type="text" name="productName" id="product_name" value={state.productName} onChange={handleChange} placeholder="Search by product name or ID" />
-          </Col>
-        </FormGroup>
-        {/* <FormGroup row>
+      <Box sx={{ width: '100%', typography: 'body1' }} >
+        <Form>
+          <FormGroup row className="mt-5">
+            <Label for="product_name" sm={2}>Search Product</Label>
+            <Col sm={10}>
+              <Input type="text" name="productName" id="product_name" value={state.productName} onChange={handleChange} placeholder="Search by product name or ID" />
+            </Col>
+          </FormGroup>
+          {/* <FormGroup row>
           <Label for="product_id" sm={2}>Product ID</Label>
           <Col sm={10}>
             <Input type="text" name="productId" id="product_id" value={state.productId} onChange={handleChange} placeholder="Search by product ID" />
           </Col>
         </FormGroup> */}
-        <FormGroup check row>
-          <Col sm={{ size: 10, offset: 2 }}>
-            <Button onClick={handleSearch} type="button">Search</Button>
-          </Col>
-        </FormGroup>
-      </Form>
-      <Table>
-        <thead>
-          <tr>
-            <th scope="col">Product ID</th>
-            <th scope="col">Product Name</th>
-            <th scope="col">Category</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.result?.map((product) => {
-            return (
-              <tr key={product.productId}>
-                <td>{product.productId}</td>
-                <td><Link to={"/product/" + product.productId + "/detail"}>{product.productName}</Link></td>
-                <td>{product.category}</td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </Table>
-      <TablePagination
-        component="div"
-        count={state.pages}
-        page={state.page}
-        onPageChange={changePage}
-        rowsPerPage={state.limit}
-        onRowsPerPageChange={changeRowsPerPage}
-      />
-      <div>
-        Total Records: {state.rows}
-      </div>
-      <div>
-        Page: {state.rows ? state.page + 1 : 0} of {state.pages}
-      </div>
-      <div>
-        
-        <div>Test state: {JSON.stringify(state)}</div>
-      </div>
+          <FormGroup check row>
+            <Col sm={{ size: 10, offset: 2 }}>
+              <Button onClick={handleSearch} type="button">Search</Button>
+            </Col>
+          </FormGroup>
+        </Form>
+        <Table className="mt-5">
+          <thead>
+            <tr>
+              <th scope="col">Product ID</th>
+              <th scope="col">Product Name</th>
+              <th scope="col">Category</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.result?.map((product) => {
+              return (
+                <tr key={product.productId}>
+                  <td>{product.productId}</td>
+                  <td><Link to={"/product/" + product.productId + "/detail"}>{product.productName}</Link></td>
+                  <td>{product.category}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </Table>
+        <TablePagination
+          component="div"
+          count={state.pages}
+          page={state.page}
+          onPageChange={changePage}
+          rowsPerPage={state.limit}
+          onRowsPerPageChange={changeRowsPerPage}
+        />
+        <div>
+          Total Records: {state.rows}
+        </div>
+        <div>
+          Page: {state.rows ? state.page + 1 : 0} of {state.pages}
+        </div>
+        <div>
+
+          <div>Test state: {JSON.stringify(state)}</div>
+        </div>
+      </Box>
     </div>
   );
 }
