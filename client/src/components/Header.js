@@ -34,31 +34,21 @@ function Header(args) {
               </DropdownToggle>
               <DropdownMenu end>
                 <DropdownItem href="/suppliers/search">Search</DropdownItem>
+                <DropdownItem divider />
                 <DropdownItem href="/suppliers/map">Map</DropdownItem>
-                <DropdownItem divider />
-                <DropdownItem>Reset</DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
-            <UncontrolledDropdown nav inNavbar>
-              <DropdownToggle nav caret>
-                Product
-              </DropdownToggle>
-              <DropdownMenu end>
-                <DropdownItem href="/products/search">Search</DropdownItem>
-                <DropdownItem>Map</DropdownItem>
-                <DropdownItem divider />
-                <DropdownItem>Reset</DropdownItem>
-              </DropdownMenu>
-            </UncontrolledDropdown>
+            <NavItem>
+              <NavLink href="/products/search">Product</NavLink>
+            </NavItem>
             <UncontrolledDropdown nav inNavbar>
               <DropdownToggle nav caret>
                 Order
               </DropdownToggle>
               <DropdownMenu end>
                 <DropdownItem href="/orders/search">Search</DropdownItem>
-                <DropdownItem>Map</DropdownItem>
                 <DropdownItem divider />
-                <DropdownItem>Reset</DropdownItem>
+                <DropdownItem>Map</DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
             <UncontrolledDropdown nav inNavbar>
@@ -67,10 +57,8 @@ function Header(args) {
               </DropdownToggle>
               <DropdownMenu end>
                 <DropdownItem href="/tools/query">Query Tools</DropdownItem>
-                <DropdownItem href="/map/box">Map Tools</DropdownItem>
-                <DropdownItem href="https://workspace-preview.neo4j.io/workspace/explore" target="_blank" rel="noopener noreferrer">Graph Tools</DropdownItem>
                 <DropdownItem divider />
-                <DropdownItem>Reset</DropdownItem>
+                <DropdownItem href="https://workspace-preview.neo4j.io/workspace/explore" target="_blank" rel="noopener noreferrer">Graph Tools</DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
           </Nav>

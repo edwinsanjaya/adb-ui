@@ -181,7 +181,7 @@ function SupplierMapPage(props) {
 
   return (
     <div>
-      <div>{JSON.stringify(startTime)} {JSON.stringify(endTime)} {JSON.stringify(inputs)}</div>
+      {/* <div>{JSON.stringify(startTime)} {JSON.stringify(endTime)} {JSON.stringify(inputs)}</div> */}
       {/* <div>{JSON.stringify(counties)}</div> */}
       <div className="search-container">
         <LocalizationProvider dateAdapter={AdapterDayjs}>
