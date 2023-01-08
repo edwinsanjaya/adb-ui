@@ -17,18 +17,8 @@ import {
 
 var inputLabelStyle = {
     width: "100%",
-    'textAlign': 'left'
+    textAlign: 'left'
 }
-
-const constantZipcode = [{
-    label: "111",
-    value: "111",
-    id: 1
-}, {
-    label: "12345",
-    value: "12345",
-    id: 2
-}]
 
 var search = {
     orderId: "",
@@ -131,10 +121,10 @@ function OrderSearchPage(props) {
 
     useEffect(() => {
         searchOrders();
-        searchZipCode();
     }, [state.page, state.rng, state.size])
 
     useEffect(() => {
+        searchZipCode();
         searchCounty();
     }, [])
 
@@ -196,10 +186,27 @@ function OrderSearchPage(props) {
         })
     }
 
-    function handleSelectAutoComplete(event, value) {
+    function handleSelectCounty(event, value) {
         const name = value.name
         setInputs({
             ...inputs,
+            zipCode: {
+                value: null
+            },
+            town: {
+                value: null
+            },
+            [name]: value
+        })
+    }
+
+    function handleSelectTown(event, value) {
+        const name = value.name
+        setInputs({
+            ...inputs,
+            zipCode: {
+                value: null
+            },
             [name]: value
         })
     }
@@ -238,16 +245,8 @@ function OrderSearchPage(props) {
                 }
                 break
             }
-            case 'shippingZipCode': {
-                let regex = /^-?\d+$/
-                if (!regex.test(value)) {
-                    return "Shipping Zip Code must be a valid number"
-                }
-                break
-            }
         }
     }
-
 
     function handleSearch(event) {
         const anyErr = Object.keys(inputs.errorMap).filter(key => !!inputs.errorMap[key])
@@ -343,12 +342,13 @@ function OrderSearchPage(props) {
                             <Col sm={10}>
                                 <Autocomplete
                                     disablePortal
-                                    id="zipcode-select"
-                                    name="zipcode"
+                                    id="zipCode-select"
+                                    name="zipCode"
+                                    value={inputs.zipCode.value}
                                     options={zipCodes}
-                                    onChange={(e, value) => {
-                                        value.name = "zipCode"
-                                        handleSelectZipCodes(e, value)
+                                    onChange={(e, val) => {
+                                        val.name = "zipCode"
+                                        handleSelectZipCodes(e, val)
                                     }}
                                     label="ZipCode"
                                     renderInput={(params) => <TextField {...params}  />}
@@ -365,7 +365,7 @@ function OrderSearchPage(props) {
                                     options={counties}
                                     onChange={(e, val) => {
                                         val.name = "county"
-                                        handleSelectAutoComplete(e, val)
+                                        handleSelectCounty(e, val)
                                         searchTownByCounty(val.value)
                                     }}
                                     label="County"
@@ -384,7 +384,7 @@ function OrderSearchPage(props) {
                                     options={towns}
                                     onChange={(e, value) => {
                                         value.name = "town"
-                                        handleSelectAutoComplete(e, value)
+                                        handleSelectTown(e, value)
                                     }}
                                     label="Town"
                                     renderInput={(params) => <TextField {...params}  />}
