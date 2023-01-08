@@ -12,6 +12,9 @@ import {
   TabPanel
 } from '@mui/lab'
 
+import Mapbox from '../components/Mapbox'
+import mapboxgl, { LngLat } from 'mapbox-gl';
+
 function SupplierDetailPage(props) {
 
   const params = useParams()
@@ -20,6 +23,7 @@ function SupplierDetailPage(props) {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [value, setValue] = useState("supplier");
+  
 
   const getSupplier = async () => {
     const url = 'http://localhost:5000/supplier/' + params.supplier_id
@@ -33,10 +37,25 @@ function SupplierDetailPage(props) {
     setProducts(response.data)
   }
 
+  function supplierToDataset(){
+    let supplierHeading = '<h4>' + supplier.supplier_name + '</h4>'
+    let supplierDetail = supplier.supplier_address + '<br>' + 'Zip Code:' + supplier.supplier_zipcode + '<br>'
+    console.log(supplier)
+    console.log(supplier.supplier_longitude)
+    let temp = {
+      'coordinates': new mapboxgl.LngLat(parseFloat(supplier.supplier_longitude), parseFloat(supplier.supplier_latitude)),
+      'popupHTML': supplierHeading + supplierDetail
+    }  
+    return [temp]
+  }
+
+  const dataset = supplier.length == 0 ? [{}] : supplierToDataset()
+
   useEffect(() => {
     getProducts();
-    getSupplier()
+    getSupplier();
   }, [])
+
 
   const handleTabChange = (event, newValue) => {
     setValue(newValue);
@@ -90,6 +109,16 @@ function SupplierDetailPage(props) {
     )
   }
 
+  function supplierMap() {
+    return(
+      <div>
+        <Mapbox
+          dataset={dataset}
+        />
+      </div>
+    )
+  }
+
   return (
     <div>
       <Box sx={{ width: '100%', typography: 'body1' }}>
@@ -103,10 +132,9 @@ function SupplierDetailPage(props) {
           </Box>
           <TabPanel value="supplier">{supplierDetail()}</TabPanel>
           <TabPanel value="product">{productList()}</TabPanel>
-          <TabPanel value="map">Item Three</TabPanel>
+          <TabPanel value="map">{supplierMap()}</TabPanel>
         </TabContext>
       </Box>
-      {/* {JSON.stringify(supplier)} */}
     </div>
   );
 }
