@@ -102,21 +102,6 @@ router.post('/orders/filter', async (req, res, next) => {
                 cancelReason: cancelReasonFilter
             })
         }
-        if (typeof cancelledFilter == "boolean") {
-            if (!!cancelledFilter) {
-                cancelOrderFilter.push({
-                    rgId: {
-                        [Op.not]: null
-                    }
-                })
-            } else {
-                cancelOrderFilter.push({
-                    rgId: {
-                        [Op.is]: null
-                    }
-                })
-            }
-        }
 
         const orderBy = [];
         if (sortedBy && sortDirection) {
@@ -146,7 +131,7 @@ router.post('/orders/filter', async (req, res, next) => {
         queryOptions.include.push({
             model: CancelOrder,
             as: 'cancelOrder',
-            required: false,
+            required: (cancelledFilter && !!cancelledFilter) || cancelOrderFilter?.length > 0,
             where: Sequelize.and(...cancelOrderFilter)
         })
         if (orderBy.length > 0) {
@@ -154,6 +139,14 @@ router.post('/orders/filter', async (req, res, next) => {
         }
 
         const orders = await Order.findAll(queryOptions)
+        for (const order of orders) {
+            const cancelOrder = await CancelOrder.findOne({
+                where: {
+                    rgId: order.rgId
+                }
+            })
+            order.cancelOrder = cancelOrder
+        }
 
         delete queryOptions.limit;
         delete queryOptions.offset;
